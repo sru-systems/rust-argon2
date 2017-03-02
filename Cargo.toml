@@ -8,7 +8,7 @@ documentation = "https://docs.sru-systems.com/rust-argon2/0.1.0/argon2/"
 homepage = "https://github.com/sru-systems/rust-argon2"
 repository = "https://github.com/sru-systems/rust-argon2"
 readme = "README.md"
-keywords = ["argon2", "argon2d", "argon2i", "argon2id", "hash", "password", "crypto"]
+keywords = ["argon2", "argon2d", "argon2i", "hash", "password"]
 
 [lib]
 name = "argon2"
