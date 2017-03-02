@@ -1,0 +1,5 @@
+write_mode = "diff"
+
+fn_arg_indent = "Tabbed"
+fn_args_layout = "Block"
+fn_call_width = 90

@@ -1,0 +1,19 @@
+[package]
+name = "rust-argon2"
+version = "0.1.0"
+authors = ["Martijn Rijkeboer <mrr@sru-systems.com>"]
+license = "MIT/Apache-2.0"
+description = "Rust implementation of the Argon2 password hashing function."
+documentation = "https://docs.sru-systems.com/rust-argon2/0.1.0/argon2/"
+homepage = "https://github.com/sru-systems/rust-argon2"
+repository = "https://github.com/sru-systems/rust-argon2"
+readme = "README.md"
+keywords = ["argon2", "argon2d", "argon2i", "argon2id", "hash", "password", "crypto"]
+
+[lib]
+name = "argon2"
+
+[dependencies]
+blake2-rfc = "0.2.17"
+crossbeam = "0.2.10"
+rustc-serialize = "0.3.22"
