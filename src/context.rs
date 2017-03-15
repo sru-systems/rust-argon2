@@ -9,6 +9,7 @@
 use super::common;
 use super::error::Error;
 use super::result::Result;
+use super::thread_mode::ThreadMode;
 use super::variant::Variant;
 use super::version::Version;
 
@@ -46,8 +47,8 @@ pub struct Context {
     /// The length of a segment.
     pub segment_length: u32,
 
-    /// The maximum number of threads.
-    pub threads: u32,
+    /// The thread mode.
+    pub thread_mode: ThreadMode,
 
     /// The number of passes.
     pub time_cost: u32,
@@ -67,7 +68,7 @@ impl Context {
         mem_cost: u32,
         time_cost: u32,
         lanes: u32,
-        threads: u32,
+        thread_mode: ThreadMode,
         pwd: Vec<u8>,
         salt: Vec<u8>,
         secret: Vec<u8>,
@@ -78,14 +79,6 @@ impl Context {
             return Err(Error::LanesTooFew);
         } else if lanes > common::MAX_LANES {
             return Err(Error::LanesTooMany);
-        }
-
-        if threads < common::MIN_THREADS {
-            return Err(Error::ThreadsTooFew);
-        } else if threads > common::MAX_THREADS {
-            return Err(Error::ThreadsTooMany);
-        } else if threads > lanes {
-            return Err(Error::ThreadsTooMany);
         }
 
         if mem_cost < common::MIN_MEMORY {
@@ -156,7 +149,7 @@ impl Context {
             salt: salt,
             secret: secret,
             segment_length: segment_length,
-            threads: threads,
+            thread_mode: thread_mode,
             time_cost: time_cost,
             variant: variant,
             version: version,
@@ -180,7 +173,7 @@ mod tests {
         let mem_cost = 4096;
         let time_cost = 3;
         let lanes = 4;
-        let threads = 1;
+        let thread_mode = ThreadMode::Sequential;
         let pwd = b"password";
         let salt = b"somesalt";
         let secret = b"secret";
@@ -191,7 +184,7 @@ mod tests {
                                   mem_cost,
                                   time_cost,
                                   lanes,
-                                  threads,
+                                  thread_mode,
                                   pwd.to_vec(),
                                   salt.to_vec(),
                                   secret.to_vec(),
@@ -205,7 +198,7 @@ mod tests {
         assert_eq!(context.mem_cost, mem_cost);
         assert_eq!(context.time_cost, time_cost);
         assert_eq!(context.lanes, lanes);
-        assert_eq!(context.threads, threads);
+        assert_eq!(context.thread_mode, thread_mode);
         assert_eq!(context.pwd, pwd.to_vec());
         assert_eq!(context.salt, salt.to_vec());
         assert_eq!(context.secret, secret.to_vec());
@@ -224,7 +217,7 @@ mod tests {
                                   mem_cost,
                                   3,
                                   4,
-                                  1,
+                                  ThreadMode::Sequential,
                                   vec![0u8; 8],
                                   vec![0u8; 8],
                                   Vec::with_capacity(0),
@@ -242,7 +235,7 @@ mod tests {
                                   mem_cost,
                                   3,
                                   lanes,
-                                  1,
+                                  ThreadMode::Sequential,
                                   vec![0u8; 8],
                                   vec![0u8; 8],
                                   Vec::with_capacity(0),
@@ -259,7 +252,7 @@ mod tests {
                                   4096,
                                   time_cost,
                                   4,
-                                  1,
+                                  ThreadMode::Sequential,
                                   vec![0u8; 8],
                                   vec![0u8; 8],
                                   Vec::with_capacity(0),
@@ -276,7 +269,7 @@ mod tests {
                                   4096,
                                   3,
                                   lanes,
-                                  1,
+                                  ThreadMode::Sequential,
                                   vec![0u8; 8],
                                   vec![0u8; 8],
                                   Vec::with_capacity(0),
@@ -293,65 +286,13 @@ mod tests {
                                   4096,
                                   3,
                                   lanes,
-                                  1,
+                                  ThreadMode::Sequential,
                                   vec![0u8; 8],
                                   vec![0u8; 8],
                                   Vec::with_capacity(0),
                                   Vec::with_capacity(0),
                                   32);
         assert_eq!(result, Err(Error::LanesTooMany));
-    }
-
-    #[test]
-    fn new_with_too_few_threads_returns_correct_error() {
-        let threads = 0;
-        let result = Context::new(Variant::Argon2i,
-                                  Version::Version13,
-                                  4096,
-                                  3,
-                                  4,
-                                  threads,
-                                  vec![0u8; 8],
-                                  vec![0u8; 8],
-                                  Vec::with_capacity(0),
-                                  Vec::with_capacity(0),
-                                  32);
-        assert_eq!(result, Err(Error::ThreadsTooFew));
-    }
-
-    #[test]
-    fn new_with_too_many_threads_returns_correct_error() {
-        let threads = 1 << 24;
-        let result = Context::new(Variant::Argon2i,
-                                  Version::Version13,
-                                  4096,
-                                  3,
-                                  4,
-                                  threads,
-                                  vec![0u8; 8],
-                                  vec![0u8; 8],
-                                  Vec::with_capacity(0),
-                                  Vec::with_capacity(0),
-                                  32);
-        assert_eq!(result, Err(Error::ThreadsTooMany));
-    }
-
-    #[test]
-    fn new_with_more_threads_than_lanes_returns_correct_error() {
-        let lanes = 4;
-        let threads = 8;
-        let result = Context::new(Variant::Argon2i,
-                                  Version::Version13,
-                                  4096,
-                                  3,
-                                  lanes,
-                                  threads,
-                                  vec![0u8; 8],
-                                  vec![0u8; 8],
-                                  Vec::with_capacity(0),
-                                  Vec::with_capacity(0),
-                                  32);
-        assert_eq!(result, Err(Error::ThreadsTooMany));
     }
 
     #[test]
@@ -362,7 +303,7 @@ mod tests {
                                   4096,
                                   3,
                                   4,
-                                  1,
+                                  ThreadMode::Sequential,
                                   vec![0u8; 8],
                                   salt,
                                   Vec::with_capacity(0),
@@ -379,7 +320,7 @@ mod tests {
                                   4096,
                                   3,
                                   4,
-                                  1,
+                                  ThreadMode::Sequential,
                                   vec![0u8; 8],
                                   vec![0u8; 8],
                                   Vec::with_capacity(0),

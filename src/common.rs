@@ -15,15 +15,6 @@ pub const MIN_LANES: u32 = 1;
 /// Maximum number of lanes (degree of parallelism).
 pub const MAX_LANES: u32 = 0x00FFFFFF;
 
-/// Default number of threads.
-pub const DEF_THREADS: u32 = 1;
-
-/// Minimum number of threads.
-pub const MIN_THREADS: u32 = 1;
-
-/// Maximum number of threads.
-pub const MAX_THREADS: u32 = 0x00FFFFFF;
-
 /// Number of synchronization points between lanes per pass.
 pub const SYNC_POINTS: u32 = 4;
 

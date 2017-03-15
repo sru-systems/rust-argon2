@@ -177,6 +177,7 @@ mod tests {
     use context::Context;
     use decoded::Decoded;
     use error::Error;
+    use thread_mode::ThreadMode;
     use variant::Variant;
     use version::Version;
     use super::*;
@@ -380,7 +381,7 @@ mod tests {
                                    mem_cost,
                                    time_cost,
                                    parallelism,
-                                   parallelism,
+                                   ThreadMode::Parallel,
                                    pwd,
                                    salt,
                                    secret,

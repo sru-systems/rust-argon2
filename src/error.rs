@@ -62,12 +62,6 @@ pub enum Error {
     /// Incorrect Argon2 variant.
     IncorrectType,
 
-    /// The number of threads is too small (minimum is 1).
-    ThreadsTooFew,
-
-    /// The number of threads is too large (maximum is 2^24 - 1).
-    ThreadsTooMany,
-
     /// The decoding of the encoded data has failed.
     DecodingFail,
 }
@@ -92,8 +86,6 @@ impl Error {
             Error::LanesTooFew => "Too few lanes",
             Error::LanesTooMany => "Too many lanes",
             Error::IncorrectType => "There is no such version of Argon2",
-            Error::ThreadsTooFew => "Not enough threads",
-            Error::ThreadsTooMany => "Too many threads",
             Error::DecodingFail => "Decoding failed",
         }
     }

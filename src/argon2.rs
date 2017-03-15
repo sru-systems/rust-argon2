@@ -12,6 +12,7 @@ use super::core;
 use super::encoding;
 use super::memory::Memory;
 use super::result::Result;
+use super::thread_mode::ThreadMode;
 use super::variant::Variant;
 use super::version::Version;
 
@@ -61,12 +62,12 @@ pub fn encoded_len(
 ///
 ///
 /// ```
-/// use argon2::{self, Variant, Version};
+/// use argon2::{self, ThreadMode, Variant, Version};
 ///
 /// let mem_cost = 4096;
 /// let time_cost = 10;
 /// let lanes = 1;
-/// let threads = 1;
+/// let thread_mode = ThreadMode::Sequential;
 /// let pwd = b"password";
 /// let salt = b"somesalt";
 /// let secret = b"secret value";
@@ -77,24 +78,20 @@ pub fn encoded_len(
 ///                                    mem_cost,
 ///                                    time_cost,
 ///                                    lanes,
-///                                    threads,
+///                                    thread_mode,
 ///                                    pwd,
 ///                                    salt,
 ///                                    secret,
 ///                                    ad,
 ///                                    hash_len).unwrap();
 /// ```
-///
-/// # Remarks
-///
-/// The only sensible values for `threads` are `1` and the number of `lanes`.
 pub fn hash_encoded(
     variant: Variant,
     version: Version,
     mem_cost: u32,
     time_cost: u32,
     lanes: u32,
-    threads: u32,
+    thread_mode: ThreadMode,
     pwd: &[u8],
     salt: &[u8],
     secret: &[u8],
@@ -106,7 +103,7 @@ pub fn hash_encoded(
                                     mem_cost,
                                     time_cost,
                                     lanes,
-                                    threads,
+                                    thread_mode,
                                     pwd.to_vec(),
                                     salt.to_vec(),
                                     secret.to_vec(),
@@ -139,7 +136,7 @@ pub fn hash_encoded(
 /// - mem_cost: 4096
 /// - time_cost: 3
 /// - lanes: 1
-/// - threads: 1
+/// - thread_mode: sequential
 /// - secret: empty slice
 /// - ad: empty slice
 /// - hash_len: 32
@@ -149,7 +146,7 @@ pub fn hash_encoded_defaults(pwd: &[u8], salt: &[u8]) -> Result<String> {
                  common::DEF_MEMORY,
                  common::DEF_TIME,
                  common::DEF_LANES,
-                 common::DEF_THREADS,
+                 ThreadMode::default(),
                  pwd,
                  salt,
                  &[],
@@ -186,7 +183,7 @@ pub fn hash_encoded_defaults(pwd: &[u8], salt: &[u8]) -> Result<String> {
 /// The following settings are used:
 ///
 /// - lanes: parallelism
-/// - threads: parallelism
+/// - thread_mode: sequential
 /// - secret: empty slice
 /// - ad: empty slice
 /// ```
@@ -205,7 +202,7 @@ pub fn hash_encoded_std(
                  mem_cost,
                  time_cost,
                  parallelism,
-                 parallelism,
+                 ThreadMode::Sequential,
                  pwd,
                  salt,
                  &[],
@@ -220,12 +217,12 @@ pub fn hash_encoded_std(
 ///
 ///
 /// ```
-/// use argon2::{self, Variant, Version};
+/// use argon2::{self, ThreadMode, Variant, Version};
 ///
 /// let mem_cost = 4096;
 /// let time_cost = 10;
 /// let lanes = 1;
-/// let threads = 1;
+/// let thread_mode = ThreadMode::Sequential;
 /// let pwd = b"password";
 /// let salt = b"somesalt";
 /// let secret = b"secret value";
@@ -236,24 +233,20 @@ pub fn hash_encoded_std(
 ///                            mem_cost,
 ///                            time_cost,
 ///                            lanes,
-///                            threads,
+///                            thread_mode,
 ///                            pwd,
 ///                            salt,
 ///                            secret,
 ///                            ad,
 ///                            hash_len).unwrap();
 /// ```
-///
-/// # Remarks
-///
-/// The only sensible values for `threads` are `1` and the number of `lanes`.
 pub fn hash_raw(
     variant: Variant,
     version: Version,
     mem_cost: u32,
     time_cost: u32,
     lanes: u32,
-    threads: u32,
+    thread_mode: ThreadMode,
     pwd: &[u8],
     salt: &[u8],
     secret: &[u8],
@@ -265,7 +258,7 @@ pub fn hash_raw(
                                     mem_cost,
                                     time_cost,
                                     lanes,
-                                    threads,
+                                    thread_mode,
                                     pwd.to_vec(),
                                     salt.to_vec(),
                                     secret.to_vec(),
@@ -298,7 +291,7 @@ pub fn hash_raw(
 /// - mem_cost: 4096
 /// - time_cost: 3
 /// - lanes: 1
-/// - threads: 1
+/// - thread_mode: sequential
 /// - secret: empty slice
 /// - ad: empty slice
 /// - hash_len: 32
@@ -308,7 +301,7 @@ pub fn hash_raw_defaults(pwd: &[u8], salt: &[u8]) -> Result<Vec<u8>> {
              common::DEF_MEMORY,
              common::DEF_TIME,
              common::DEF_LANES,
-             common::DEF_THREADS,
+             ThreadMode::default(),
              pwd,
              salt,
              &[],
@@ -346,7 +339,7 @@ pub fn hash_raw_defaults(pwd: &[u8], salt: &[u8]) -> Result<Vec<u8>> {
 /// The following settings are used:
 ///
 /// - lanes: parallelism
-/// - threads: parallelism
+/// - thread_mode: sequential
 /// - secret: empty slice
 /// - ad: empty slice
 /// ```
@@ -365,7 +358,7 @@ pub fn hash_raw_std(
              mem_cost,
              time_cost,
              parallelism,
-             parallelism,
+             ThreadMode::Sequential,
              pwd,
              salt,
              &[],
@@ -393,7 +386,7 @@ pub fn verify_encoded(encoded: &str, pwd: &[u8]) -> Result<bool> {
                decoded.mem_cost,
                decoded.time_cost,
                decoded.parallelism,
-               decoded.parallelism,
+               ThreadMode::Parallel,
                pwd,
                &decoded.salt,
                &[],
@@ -407,12 +400,12 @@ pub fn verify_encoded(encoded: &str, pwd: &[u8]) -> Result<bool> {
 ///
 ///
 /// ```
-/// use argon2::{self, Variant, Version};
+/// use argon2::{self, ThreadMode, Variant, Version};
 ///
 /// let mem_cost = 4096;
 /// let time_cost = 3;
 /// let lanes = 1;
-/// let threads = 1;
+/// let thread_mode = ThreadMode::Sequential;
 /// let pwd = b"password";
 /// let salt = b"somesalt";
 /// let secret = &[];
@@ -425,7 +418,7 @@ pub fn verify_encoded(encoded: &str, pwd: &[u8]) -> Result<bool> {
 ///                              mem_cost,
 ///                              time_cost,
 ///                              lanes,
-///                              threads,
+///                              thread_mode,
 ///                              pwd,
 ///                              salt,
 ///                              secret,
@@ -439,7 +432,7 @@ pub fn verify_raw(
     mem_cost: u32,
     time_cost: u32,
     lanes: u32,
-    threads: u32,
+    thread_mode: ThreadMode,
     pwd: &[u8],
     salt: &[u8],
     secret: &[u8],
@@ -451,7 +444,7 @@ pub fn verify_raw(
                                     mem_cost,
                                     time_cost,
                                     lanes,
-                                    threads,
+                                    thread_mode,
                                     pwd.to_vec(),
                                     salt.to_vec(),
                                     secret.to_vec(),
@@ -502,7 +495,7 @@ pub fn verify_raw_std(
                mem_cost,
                time_cost,
                parallelism,
-               parallelism,
+               ThreadMode::Parallel,
                pwd,
                salt,
                &[],
