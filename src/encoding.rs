@@ -382,10 +382,10 @@ mod tests {
                                    time_cost,
                                    parallelism,
                                    ThreadMode::Parallel,
-                                   pwd,
-                                   salt,
-                                   secret,
-                                   ad,
+                                   &pwd,
+                                   &salt,
+                                   &secret,
+                                   &ad,
                                    hash_length)
             .unwrap();
         let expected = "$argon2i$v=19$m=4096,t=3,p=1\
