@@ -91,11 +91,13 @@ mod encoding;
 mod error;
 mod memory;
 mod result;
+mod thread_mode;
 mod variant;
 mod version;
 
 pub use argon2::*;
 pub use error::Error;
 pub use result::Result;
+pub use thread_mode::ThreadMode;
 pub use variant::Variant;
 pub use version::Version;

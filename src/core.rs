@@ -13,6 +13,7 @@ use super::block::Block;
 use super::common;
 use super::context::Context;
 use super::memory::Memory;
+use super::thread_mode::ThreadMode;
 use super::variant::Variant;
 use super::version::Version;
 
@@ -32,7 +33,7 @@ pub fn initialize(context: &Context, memory: &mut Memory) {
 
 /// Fills all the memory blocks.
 pub fn fill_memory_blocks(context: &Context, memory: &mut Memory) {
-    if context.threads == 1 {
+    if context.thread_mode == ThreadMode::Sequential || context.lanes == 1 {
         fill_memory_blocks_st(context, memory);
     } else {
         fill_memory_blocks_mt(context, memory);
