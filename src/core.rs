@@ -353,14 +353,14 @@ fn h0(context: &Context) -> [u8; common::PREHASH_SEED_LENGTH] {
                  &u32_as_32le(context.time_cost),
                  &u32_as_32le(context.version.as_u32()),
                  &u32_as_32le(context.variant.as_u32()),
-                 &len_as_32le(&context.pwd),
-                 context.pwd.as_slice(),
-                 &len_as_32le(&context.salt),
-                 context.salt.as_slice(),
-                 &len_as_32le(&context.secret),
-                 context.secret.as_slice(),
-                 &len_as_32le(&context.ad),
-                 context.ad.as_slice()];
+                 &len_as_32le(context.pwd),
+                 context.pwd.as_ref(),
+                 &len_as_32le(context.salt),
+                 context.salt.as_ref(),
+                 &len_as_32le(context.secret),
+                 context.secret.as_ref(),
+                 &len_as_32le(context.ad),
+                 context.ad.as_ref()];
     let mut out = [0u8; common::PREHASH_SEED_LENGTH];
     blake2b(&mut out[0..common::PREHASH_DIGEST_LENGTH], &input);
     out

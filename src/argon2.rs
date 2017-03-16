@@ -104,10 +104,10 @@ pub fn hash_encoded(
                                     time_cost,
                                     lanes,
                                     thread_mode,
-                                    pwd.to_vec(),
-                                    salt.to_vec(),
-                                    secret.to_vec(),
-                                    ad.to_vec(),
+                                    pwd,
+                                    salt,
+                                    secret,
+                                    ad,
                                     hash_len));
     let hash = run(&context);
     let encoded = encoding::encode_string(&context, &hash);
@@ -259,10 +259,10 @@ pub fn hash_raw(
                                     time_cost,
                                     lanes,
                                     thread_mode,
-                                    pwd.to_vec(),
-                                    salt.to_vec(),
-                                    secret.to_vec(),
-                                    ad.to_vec(),
+                                    pwd,
+                                    salt,
+                                    secret,
+                                    ad,
                                     hash_len));
     let hash = run(&context);
     Ok(hash)
@@ -445,10 +445,10 @@ pub fn verify_raw(
                                     time_cost,
                                     lanes,
                                     thread_mode,
-                                    pwd.to_vec(),
-                                    salt.to_vec(),
-                                    secret.to_vec(),
-                                    ad.to_vec(),
+                                    pwd,
+                                    salt,
+                                    secret,
+                                    ad,
                                     hash.len() as u32));
     Ok(run(&context) == hash)
 }

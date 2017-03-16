@@ -16,9 +16,9 @@ use super::version::Version;
 /// Structure containing settings for the Argon2 algorithm. A combination of
 /// the original argon2_context and argon2_instance_t.
 #[derive(Debug, PartialEq)]
-pub struct Context {
+pub struct Context<'a> {
     /// The associated data.
-    pub ad: Vec<u8>,
+    pub ad: &'a [u8],
 
     /// The length of the resulting hash.
     pub hash_length: u32,
@@ -36,13 +36,13 @@ pub struct Context {
     pub memory_blocks: u32,
 
     /// The password.
-    pub pwd: Vec<u8>,
+    pub pwd: &'a [u8],
 
     /// The salt.
-    pub salt: Vec<u8>,
+    pub salt: &'a [u8],
 
     /// The key.
-    pub secret: Vec<u8>,
+    pub secret: &'a [u8],
 
     /// The length of a segment.
     pub segment_length: u32,
@@ -60,7 +60,7 @@ pub struct Context {
     pub version: Version,
 }
 
-impl Context {
+impl<'a> Context<'a> {
     /// Attempts to create a new context.
     pub fn new(
         variant: Variant,
@@ -69,12 +69,12 @@ impl Context {
         time_cost: u32,
         lanes: u32,
         thread_mode: ThreadMode,
-        pwd: Vec<u8>,
-        salt: Vec<u8>,
-        secret: Vec<u8>,
-        ad: Vec<u8>,
+        pwd: &'a [u8],
+        salt: &'a [u8],
+        secret: &'a [u8],
+        ad: &'a [u8],
         hash_length: u32
-    ) -> Result<Context> {
+    ) -> Result<Context<'a>> {
         if lanes < common::MIN_LANES {
             return Err(Error::LanesTooFew);
         } else if lanes > common::MAX_LANES {
@@ -185,10 +185,10 @@ mod tests {
                                   time_cost,
                                   lanes,
                                   thread_mode,
-                                  pwd.to_vec(),
-                                  salt.to_vec(),
-                                  secret.to_vec(),
-                                  ad.to_vec(),
+                                  pwd.as_ref(),
+                                  salt.as_ref(),
+                                  secret.as_ref(),
+                                  ad.as_ref(),
                                   hash_length);
         assert!(result.is_ok());
 
@@ -199,10 +199,10 @@ mod tests {
         assert_eq!(context.time_cost, time_cost);
         assert_eq!(context.lanes, lanes);
         assert_eq!(context.thread_mode, thread_mode);
-        assert_eq!(context.pwd, pwd.to_vec());
-        assert_eq!(context.salt, salt.to_vec());
-        assert_eq!(context.secret, secret.to_vec());
-        assert_eq!(context.ad, ad.to_vec());
+        assert_eq!(context.pwd.as_ptr(), pwd.as_ptr());
+        assert_eq!(context.salt.as_ptr(), salt.as_ptr());
+        assert_eq!(context.secret.as_ptr(), secret.as_ptr());
+        assert_eq!(context.ad.as_ptr(), ad.as_ptr());
         assert_eq!(context.hash_length, hash_length);
         assert_eq!(context.memory_blocks, 4096);
         assert_eq!(context.segment_length, 256);
@@ -212,120 +212,120 @@ mod tests {
     #[test]
     fn new_with_too_little_mem_cost_returns_correct_error() {
         let mem_cost = 7;
-        let result = Context::new(Variant::Argon2i,
-                                  Version::Version13,
-                                  mem_cost,
-                                  3,
-                                  4,
-                                  ThreadMode::Sequential,
-                                  vec![0u8; 8],
-                                  vec![0u8; 8],
-                                  Vec::with_capacity(0),
-                                  Vec::with_capacity(0),
-                                  32);
-        assert_eq!(result, Err(Error::MemoryTooLittle));
+        assert_eq!(Context::new(Variant::Argon2i,
+                                Version::Version13,
+                                mem_cost,
+                                3,
+                                4,
+                                ThreadMode::Sequential,
+                                &vec![0u8; 8],
+                                &vec![0u8; 8],
+                                &vec![],
+                                &vec![],
+                                32),
+                   Err(Error::MemoryTooLittle));
     }
 
     #[test]
     fn new_with_less_than_8_x_lanes_mem_cost_returns_correct_error() {
         let lanes = 4;
         let mem_cost = 31;
-        let result = Context::new(Variant::Argon2i,
-                                  Version::Version13,
-                                  mem_cost,
-                                  3,
-                                  lanes,
-                                  ThreadMode::Sequential,
-                                  vec![0u8; 8],
-                                  vec![0u8; 8],
-                                  Vec::with_capacity(0),
-                                  Vec::with_capacity(0),
-                                  32);
-        assert_eq!(result, Err(Error::MemoryTooLittle));
+        assert_eq!(Context::new(Variant::Argon2i,
+                                Version::Version13,
+                                mem_cost,
+                                3,
+                                lanes,
+                                ThreadMode::Sequential,
+                                &vec![0u8; 8],
+                                &vec![0u8; 8],
+                                &vec![],
+                                &vec![],
+                                32),
+                   Err(Error::MemoryTooLittle));
     }
 
     #[test]
     fn new_with_too_small_time_cost_returns_correct_error() {
         let time_cost = 0;
-        let result = Context::new(Variant::Argon2i,
-                                  Version::Version13,
-                                  4096,
-                                  time_cost,
-                                  4,
-                                  ThreadMode::Sequential,
-                                  vec![0u8; 8],
-                                  vec![0u8; 8],
-                                  Vec::with_capacity(0),
-                                  Vec::with_capacity(0),
-                                  32);
-        assert_eq!(result, Err(Error::TimeTooSmall));
+        assert_eq!(Context::new(Variant::Argon2i,
+                                Version::Version13,
+                                4096,
+                                time_cost,
+                                4,
+                                ThreadMode::Sequential,
+                                &vec![0u8; 8],
+                                &vec![0u8; 8],
+                                &vec![],
+                                &vec![],
+                                32),
+                   Err(Error::TimeTooSmall));
     }
 
     #[test]
     fn new_with_too_few_lanes_returns_correct_error() {
         let lanes = 0;
-        let result = Context::new(Variant::Argon2i,
-                                  Version::Version13,
-                                  4096,
-                                  3,
-                                  lanes,
-                                  ThreadMode::Sequential,
-                                  vec![0u8; 8],
-                                  vec![0u8; 8],
-                                  Vec::with_capacity(0),
-                                  Vec::with_capacity(0),
-                                  32);
-        assert_eq!(result, Err(Error::LanesTooFew));
+        assert_eq!(Context::new(Variant::Argon2i,
+                                Version::Version13,
+                                4096,
+                                3,
+                                lanes,
+                                ThreadMode::Sequential,
+                                &vec![0u8; 8],
+                                &vec![0u8; 8],
+                                &vec![],
+                                &vec![],
+                                32),
+                   Err(Error::LanesTooFew));
     }
 
     #[test]
     fn new_with_too_many_lanes_returns_correct_error() {
         let lanes = 1 << 24;
-        let result = Context::new(Variant::Argon2i,
-                                  Version::Version13,
-                                  4096,
-                                  3,
-                                  lanes,
-                                  ThreadMode::Sequential,
-                                  vec![0u8; 8],
-                                  vec![0u8; 8],
-                                  Vec::with_capacity(0),
-                                  Vec::with_capacity(0),
-                                  32);
-        assert_eq!(result, Err(Error::LanesTooMany));
+        assert_eq!(Context::new(Variant::Argon2i,
+                                Version::Version13,
+                                4096,
+                                3,
+                                lanes,
+                                ThreadMode::Sequential,
+                                &vec![0u8; 8],
+                                &vec![0u8; 8],
+                                &vec![],
+                                &vec![],
+                                32),
+                   Err(Error::LanesTooMany));
     }
 
     #[test]
     fn new_with_too_short_salt_returns_correct_error() {
         let salt = vec![0u8; 7];
-        let result = Context::new(Variant::Argon2i,
-                                  Version::Version13,
-                                  4096,
-                                  3,
-                                  4,
-                                  ThreadMode::Sequential,
-                                  vec![0u8; 8],
-                                  salt,
-                                  Vec::with_capacity(0),
-                                  Vec::with_capacity(0),
-                                  32);
-        assert_eq!(result, Err(Error::SaltTooShort));
+        assert_eq!(Context::new(Variant::Argon2i,
+                                Version::Version13,
+                                4096,
+                                3,
+                                4,
+                                ThreadMode::Sequential,
+                                &vec![0u8; 8],
+                                &salt,
+                                &vec![],
+                                &vec![],
+                                32),
+                   Err(Error::SaltTooShort));
     }
 
     #[test]
     fn new_with_too_short_hash_length_returns_correct_error() {
         let hash_length = 3;
-        let result = Context::new(Variant::Argon2i,
-                                  Version::Version13,
-                                  4096,
-                                  3,
-                                  4,
-                                  ThreadMode::Sequential,
-                                  vec![0u8; 8],
-                                  vec![0u8; 8],
-                                  Vec::with_capacity(0),
-                                  Vec::with_capacity(0),
-                                  hash_length);
-        assert_eq!(result, Err(Error::OutputTooShort));
+        assert_eq!(Context::new(Variant::Argon2i,
+                                Version::Version13,
+                                4096,
+                                3,
+                                4,
+                                ThreadMode::Sequential,
+                                &vec![0u8; 8],
+                                &vec![0u8; 8],
+                                &vec![],
+                                &vec![],
+                                hash_length),
+                   Err(Error::OutputTooShort));
     }
 }
