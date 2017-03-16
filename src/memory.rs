@@ -20,7 +20,7 @@ pub struct Memory {
     cols: usize,
 
     /// The flat array of blocks representing the memory matrix.
-    blocks: Vec<Block>,
+    blocks: Box<[Block]>,
 }
 
 impl Memory {
@@ -29,11 +29,7 @@ impl Memory {
         let rows = lanes as usize;
         let cols = lane_length as usize;
         let total = rows * cols;
-        let block = Block::zero();
-        let mut blocks = Vec::with_capacity(total);
-        for _ in 0..total {
-            blocks.push(block.clone());
-        }
+        let blocks = vec![Block::zero(); total].into_boxed_slice();
         Memory {
             rows: rows,
             cols: cols,
