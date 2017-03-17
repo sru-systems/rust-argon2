@@ -92,10 +92,10 @@ pub fn hash_encoded(pwd: &[u8], salt: &[u8], config: &Config) -> Result<String> 
                                     config.time_cost,
                                     config.lanes,
                                     config.thread_mode,
-                                    pwd.to_vec(),
-                                    salt.to_vec(),
-                                    config.secret.to_vec(),
-                                    config.ad.to_vec(),
+                                    pwd,
+                                    salt,
+                                    config.secret,
+                                    config.ad,
                                     config.hash_length));
     let hash = run(&context);
     let encoded = encoding::encode_string(&context, &hash);
@@ -312,10 +312,10 @@ pub fn hash_raw(pwd: &[u8], salt: &[u8], config: &Config) -> Result<Vec<u8>> {
                                     config.time_cost,
                                     config.lanes,
                                     config.thread_mode,
-                                    pwd.to_vec(),
-                                    salt.to_vec(),
-                                    config.secret.to_vec(),
-                                    config.ad.to_vec(),
+                                    pwd,
+                                    salt,
+                                    config.secret,
+                                    config.ad,
                                     config.hash_length));
     let hash = run(&context);
     Ok(hash)
@@ -548,10 +548,10 @@ pub fn verify_raw(pwd: &[u8], salt: &[u8], hash: &[u8], config: &Config) -> Resu
                                     config.time_cost,
                                     config.lanes,
                                     config.thread_mode,
-                                    pwd.to_vec(),
-                                    salt.to_vec(),
-                                    config.secret.to_vec(),
-                                    config.ad.to_vec(),
+                                    pwd,
+                                    salt,
+                                    config.secret,
+                                    config.ad,
                                     hash.len() as u32));
     Ok(run(&context) == hash)
 }
