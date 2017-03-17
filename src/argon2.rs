@@ -7,7 +7,7 @@
 // except according to those terms.
 
 use super::context::Context;
-use super::common;
+use super::config::Config;
 use super::core;
 use super::encoding;
 use super::memory::Memory;
@@ -60,55 +60,43 @@ pub fn encoded_len(
 ///
 /// # Examples
 ///
+/// Create an encoded hash with the default configuration:
 ///
 /// ```
-/// use argon2::{self, ThreadMode, Variant, Version};
+/// use argon2::{self, Config};
 ///
-/// let mem_cost = 4096;
-/// let time_cost = 10;
-/// let lanes = 1;
-/// let thread_mode = ThreadMode::Sequential;
 /// let pwd = b"password";
 /// let salt = b"somesalt";
-/// let secret = b"secret value";
-/// let ad = b"associated data";
-/// let hash_len = 32;
-/// let encoded = argon2::hash_encoded(Variant::Argon2i,
-///                                    Version::Version13,
-///                                    mem_cost,
-///                                    time_cost,
-///                                    lanes,
-///                                    thread_mode,
-///                                    pwd,
-///                                    salt,
-///                                    secret,
-///                                    ad,
-///                                    hash_len).unwrap();
+/// let config = Config::default();
+/// let encoded = argon2::hash_encoded(pwd, salt, &config).unwrap();
 /// ```
-pub fn hash_encoded(
-    variant: Variant,
-    version: Version,
-    mem_cost: u32,
-    time_cost: u32,
-    lanes: u32,
-    thread_mode: ThreadMode,
-    pwd: &[u8],
-    salt: &[u8],
-    secret: &[u8],
-    ad: &[u8],
-    hash_len: u32
-) -> Result<String> {
-    let context = try!(Context::new(variant,
-                                    version,
-                                    mem_cost,
-                                    time_cost,
-                                    lanes,
-                                    thread_mode,
+///
+///
+/// Create an Argon2d encoded hash with 4 lanes and parallel execution:
+///
+/// ```
+/// use argon2::{self, Config, ThreadMode, Variant};
+///
+/// let pwd = b"password";
+/// let salt = b"somesalt";
+/// let mut config = Config::default();
+/// config.variant = Variant::Argon2d;
+/// config.lanes = 4;
+/// config.thread_mode = ThreadMode::Parallel;
+/// let encoded = argon2::hash_encoded(pwd, salt, &config).unwrap();
+/// ```
+pub fn hash_encoded(pwd: &[u8], salt: &[u8], config: &Config) -> Result<String> {
+    let context = try!(Context::new(config.variant,
+                                    config.version,
+                                    config.mem_cost,
+                                    config.time_cost,
+                                    config.lanes,
+                                    config.thread_mode,
                                     pwd.to_vec(),
                                     salt.to_vec(),
-                                    secret.to_vec(),
-                                    ad.to_vec(),
-                                    hash_len));
+                                    config.secret.to_vec(),
+                                    config.ad.to_vec(),
+                                    config.hash_length));
     let hash = run(&context);
     let encoded = encoding::encode_string(&context, &hash);
     Ok(encoded)
@@ -118,7 +106,6 @@ pub fn hash_encoded(
 ///
 /// # Examples
 ///
-///
 /// ```
 /// use argon2;
 ///
@@ -127,31 +114,97 @@ pub fn hash_encoded(
 /// let encoded = argon2::hash_encoded_defaults(pwd, salt).unwrap();
 /// ```
 ///
-/// # Remarks
+/// The above rewritten using `hash_encoded`:
 ///
-/// The following settings are used:
+/// ```
+/// use argon2::{self, Config};
 ///
-/// - variant: Variant::Argon2i
-/// - version: Version::Version13
-/// - mem_cost: 4096
-/// - time_cost: 3
-/// - lanes: 1
-/// - thread_mode: sequential
-/// - secret: empty slice
-/// - ad: empty slice
-/// - hash_len: 32
+/// let pwd = b"password";
+/// let salt = b"somesalt";
+/// let config = Config::default();
+/// let encoded = argon2::hash_encoded(pwd, salt, &config).unwrap();
+/// ```
+#[deprecated(since="0.2.0", note="please use `hash_encoded` instead")]
 pub fn hash_encoded_defaults(pwd: &[u8], salt: &[u8]) -> Result<String> {
-    hash_encoded(Variant::default(),
-                 Version::default(),
-                 common::DEF_MEMORY,
-                 common::DEF_TIME,
-                 common::DEF_LANES,
-                 ThreadMode::default(),
-                 pwd,
-                 salt,
-                 &[],
-                 &[],
-                 common::DEF_HASH_LENGTH)
+    hash_encoded(pwd, salt, &Config::default())
+}
+
+/// Hashes the password and returns the encoded hash (pre 0.2.0 `hash_encoded`).
+///
+/// # Examples
+///
+///
+/// ```
+/// use argon2::{self, Variant, Version};
+///
+/// let pwd = b"password";
+/// let salt = b"somesalt";
+/// let mem_cost = 4096;
+/// let time_cost = 10;
+/// let lanes = 1;
+/// let threads = 1;
+/// let secret = b"secret value";
+/// let ad = b"associated data";
+/// let hash_len = 32;
+/// let encoded = argon2::hash_encoded_old(Variant::Argon2i,
+///                                        Version::Version13,
+///                                        mem_cost,
+///                                        time_cost,
+///                                        lanes,
+///                                        threads,
+///                                        pwd,
+///                                        salt,
+///                                        secret,
+///                                        ad,
+///                                        hash_len).unwrap();
+/// ```
+///
+/// The above rewritten using the new `hash_encoded`:
+///
+/// ```
+/// use argon2::{self, Config, ThreadMode, Variant, Version};
+///
+/// let pwd = b"password";
+/// let salt = b"somesalt";
+/// let config = Config {
+///     variant: Variant::Argon2i,
+///     version: Version::Version13,
+///     mem_cost: 4096,
+///     time_cost: 10,
+///     lanes: 1,
+///     thread_mode: ThreadMode::Sequential,
+///     secret: b"secret value",
+///     ad: b"associated data",
+///     hash_length: 32,
+/// };
+/// let encoded = argon2::hash_encoded(pwd, salt, &config).unwrap();
+/// ```
+#[deprecated(since="0.2.0", note="please use new `hash_encoded` instead")]
+pub fn hash_encoded_old(
+    variant: Variant,
+    version: Version,
+    mem_cost: u32,
+    time_cost: u32,
+    lanes: u32,
+    threads: u32,
+    pwd: &[u8],
+    salt: &[u8],
+    secret: &[u8],
+    ad: &[u8],
+    hash_len: u32
+) -> Result<String> {
+    let config = Config {
+        variant: variant,
+        version: version,
+        mem_cost: mem_cost,
+        time_cost: time_cost,
+        lanes: lanes,
+        thread_mode: ThreadMode::from_threads(threads),
+        secret: secret,
+        ad: ad,
+        hash_length: hash_len,
+    };
+    hash_encoded(pwd, salt, &config)
 }
 
 /// Hashes the password and returns the encoded hash (standard).
@@ -162,11 +215,11 @@ pub fn hash_encoded_defaults(pwd: &[u8], salt: &[u8]) -> Result<String> {
 /// ```
 /// use argon2::{self, Variant, Version};
 ///
+/// let pwd = b"password";
+/// let salt = b"somesalt";
 /// let mem_cost = 4096;
 /// let time_cost = 10;
 /// let parallelism = 1;
-/// let pwd = b"password";
-/// let salt = b"somesalt";
 /// let hash_len = 32;
 /// let encoded = argon2::hash_encoded_std(Variant::Argon2i,
 ///                                        Version::Version13,
@@ -178,15 +231,27 @@ pub fn hash_encoded_defaults(pwd: &[u8], salt: &[u8]) -> Result<String> {
 ///                                        hash_len).unwrap();
 /// ```
 ///
-/// # Remarks
+/// The above rewritten using `hash_encoded`:
 ///
-/// The following settings are used:
-///
-/// - lanes: parallelism
-/// - thread_mode: sequential
-/// - secret: empty slice
-/// - ad: empty slice
 /// ```
+/// use argon2::{self, Config, ThreadMode, Variant, Version};
+///
+/// let pwd = b"password";
+/// let salt = b"somesalt";
+/// let config = Config {
+///     variant: Variant::Argon2i,
+///     version: Version::Version13,
+///     mem_cost: 4096,
+///     time_cost: 10,
+///     lanes: 1,
+///     thread_mode: ThreadMode::Sequential,
+///     secret: &[],
+///     ad: &[],
+///     hash_length: 32,
+/// };
+/// let encoded = argon2::hash_encoded(pwd, salt, &config).unwrap();
+/// ```
+#[deprecated(since="0.2.0", note="please use `hash_encoded` instead")]
 pub fn hash_encoded_std(
     variant: Variant,
     version: Version,
@@ -197,82 +262,68 @@ pub fn hash_encoded_std(
     salt: &[u8],
     hash_len: u32
 ) -> Result<String> {
-    hash_encoded(variant,
-                 version,
-                 mem_cost,
-                 time_cost,
-                 parallelism,
-                 ThreadMode::Sequential,
-                 pwd,
-                 salt,
-                 &[],
-                 &[],
-                 hash_len)
+    let config = Config {
+        variant: variant,
+        version: version,
+        mem_cost: mem_cost,
+        time_cost: time_cost,
+        lanes: parallelism,
+        thread_mode: ThreadMode::from_threads(parallelism),
+        secret: &[],
+        ad: &[],
+        hash_length: hash_len,
+    };
+    hash_encoded(pwd, salt, &config)
 }
-
 
 /// Hashes the password and returns the hash as a vector.
 ///
 /// # Examples
 ///
+/// Create a hash with the default configuration:
 ///
 /// ```
-/// use argon2::{self, ThreadMode, Variant, Version};
+/// use argon2::{self, Config};
 ///
-/// let mem_cost = 4096;
-/// let time_cost = 10;
-/// let lanes = 1;
-/// let thread_mode = ThreadMode::Sequential;
 /// let pwd = b"password";
 /// let salt = b"somesalt";
-/// let secret = b"secret value";
-/// let ad = b"associated data";
-/// let hash_len = 32;
-/// let vec = argon2::hash_raw(Variant::Argon2i,
-///                            Version::Version13,
-///                            mem_cost,
-///                            time_cost,
-///                            lanes,
-///                            thread_mode,
-///                            pwd,
-///                            salt,
-///                            secret,
-///                            ad,
-///                            hash_len).unwrap();
+/// let config = Config::default();
+/// let vec = argon2::hash_raw(pwd, salt, &config).unwrap();
 /// ```
-pub fn hash_raw(
-    variant: Variant,
-    version: Version,
-    mem_cost: u32,
-    time_cost: u32,
-    lanes: u32,
-    thread_mode: ThreadMode,
-    pwd: &[u8],
-    salt: &[u8],
-    secret: &[u8],
-    ad: &[u8],
-    hash_len: u32
-) -> Result<Vec<u8>> {
-    let context = try!(Context::new(variant,
-                                    version,
-                                    mem_cost,
-                                    time_cost,
-                                    lanes,
-                                    thread_mode,
+///
+///
+/// Create an Argon2d hash with 4 lanes and parallel execution:
+///
+/// ```
+/// use argon2::{self, Config, ThreadMode, Variant};
+///
+/// let pwd = b"password";
+/// let salt = b"somesalt";
+/// let mut config = Config::default();
+/// config.variant = Variant::Argon2d;
+/// config.lanes = 4;
+/// config.thread_mode = ThreadMode::Parallel;
+/// let vec = argon2::hash_raw(pwd, salt, &config).unwrap();
+/// ```
+pub fn hash_raw(pwd: &[u8], salt: &[u8], config: &Config) -> Result<Vec<u8>> {
+    let context = try!(Context::new(config.variant,
+                                    config.version,
+                                    config.mem_cost,
+                                    config.time_cost,
+                                    config.lanes,
+                                    config.thread_mode,
                                     pwd.to_vec(),
                                     salt.to_vec(),
-                                    secret.to_vec(),
-                                    ad.to_vec(),
-                                    hash_len));
+                                    config.secret.to_vec(),
+                                    config.ad.to_vec(),
+                                    config.hash_length));
     let hash = run(&context);
     Ok(hash)
 }
 
-
 /// Hashes the password using default settings and returns the hash as a vector.
 ///
 /// # Examples
-///
 ///
 /// ```
 /// use argon2;
@@ -282,35 +333,22 @@ pub fn hash_raw(
 /// let vec = argon2::hash_raw_defaults(pwd, salt).unwrap();
 /// ```
 ///
-/// # Remarks
+/// The above rewritten using `hash_raw`:
 ///
-/// The following settings are used:
+/// ```
+/// use argon2::{self, Config};
 ///
-/// - variant: Variant::Argon2i
-/// - version: Version::Version13
-/// - mem_cost: 4096
-/// - time_cost: 3
-/// - lanes: 1
-/// - thread_mode: sequential
-/// - secret: empty slice
-/// - ad: empty slice
-/// - hash_len: 32
+/// let pwd = b"password";
+/// let salt = b"somesalt";
+/// let config = Config::default();
+/// let vec = argon2::hash_raw(pwd, salt, &config).unwrap();
+/// ```
+#[deprecated(since="0.2.0", note="please use `hash_raw` instead")]
 pub fn hash_raw_defaults(pwd: &[u8], salt: &[u8]) -> Result<Vec<u8>> {
-    hash_raw(Variant::default(),
-             Version::default(),
-             common::DEF_MEMORY,
-             common::DEF_TIME,
-             common::DEF_LANES,
-             ThreadMode::default(),
-             pwd,
-             salt,
-             &[],
-             &[],
-             common::DEF_HASH_LENGTH)
+    hash_raw(pwd, salt, &Config::default())
 }
 
-
-/// Hashes the password and returns the hash as a vector (standard).
+/// Hashes the password and returns the hash as a vector (pre 0.2.0 `hash_raw`).
 ///
 /// # Examples
 ///
@@ -320,9 +358,87 @@ pub fn hash_raw_defaults(pwd: &[u8], salt: &[u8]) -> Result<Vec<u8>> {
 ///
 /// let mem_cost = 4096;
 /// let time_cost = 10;
-/// let parallelism = 1;
+/// let lanes = 1;
+/// let threads = 1;
 /// let pwd = b"password";
 /// let salt = b"somesalt";
+/// let secret = b"secret value";
+/// let ad = b"associated data";
+/// let hash_len = 32;
+/// let vec = argon2::hash_raw_old(Variant::Argon2i,
+///                                Version::Version13,
+///                                mem_cost,
+///                                time_cost,
+///                                lanes,
+///                                threads,
+///                                pwd,
+///                                salt,
+///                                secret,
+///                                ad,
+///                                hash_len).unwrap();
+/// ```
+///
+/// The above rewritten using the new `hash_raw`:
+///
+/// ```
+/// use argon2::{self, Config, ThreadMode, Variant, Version};
+///
+/// let pwd = b"password";
+/// let salt = b"somesalt";
+/// let config = Config {
+///     variant: Variant::Argon2i,
+///     version: Version::Version13,
+///     mem_cost: 4096,
+///     time_cost: 10,
+///     lanes: 1,
+///     thread_mode: ThreadMode::Sequential,
+///     secret: b"secret value",
+///     ad: b"associated data",
+///     hash_length: 32,
+/// };
+/// let vec = argon2::hash_raw(pwd, salt, &config);
+/// ```
+#[deprecated(since="0.2.0", note="please use new `hash_raw` instead")]
+pub fn hash_raw_old(
+    variant: Variant,
+    version: Version,
+    mem_cost: u32,
+    time_cost: u32,
+    lanes: u32,
+    threads: u32,
+    pwd: &[u8],
+    salt: &[u8],
+    secret: &[u8],
+    ad: &[u8],
+    hash_len: u32
+) -> Result<Vec<u8>> {
+    let config = Config {
+        variant: variant,
+        version: version,
+        mem_cost: mem_cost,
+        time_cost: time_cost,
+        lanes: lanes,
+        thread_mode: ThreadMode::from_threads(threads),
+        secret: secret,
+        ad: ad,
+        hash_length: hash_len,
+    };
+    hash_raw(pwd, salt, &config)
+}
+
+/// Hashes the password and returns the hash as a vector (standard).
+///
+/// # Examples
+///
+///
+/// ```
+/// use argon2::{self, Variant, Version};
+///
+/// let pwd = b"password";
+/// let salt = b"somesalt";
+/// let mem_cost = 4096;
+/// let time_cost = 10;
+/// let parallelism = 1;
 /// let hash_len = 32;
 /// let vec = argon2::hash_raw_std(Variant::Argon2i,
 ///                                Version::Version13,
@@ -334,15 +450,27 @@ pub fn hash_raw_defaults(pwd: &[u8], salt: &[u8]) -> Result<Vec<u8>> {
 ///                                hash_len).unwrap();
 /// ```
 ///
-/// # Remarks
+/// The above rewritten using `hash_raw`:
 ///
-/// The following settings are used:
-///
-/// - lanes: parallelism
-/// - thread_mode: sequential
-/// - secret: empty slice
-/// - ad: empty slice
 /// ```
+/// use argon2::{self, Config, ThreadMode, Variant, Version};
+///
+/// let pwd = b"password";
+/// let salt = b"somesalt";
+/// let config = Config {
+///     variant: Variant::Argon2i,
+///     version: Version::Version13,
+///     mem_cost: 4096,
+///     time_cost: 10,
+///     lanes: 1,
+///     thread_mode: ThreadMode::Sequential,
+///     secret: &[],
+///     ad: &[],
+///     hash_length: 32,
+/// };
+/// let vec = argon2::hash_raw(pwd, salt, &config);
+/// ```
+#[deprecated(since="0.2.0", note="please use `hash_raw` instead")]
 pub fn hash_raw_std(
     variant: Variant,
     version: Version,
@@ -353,17 +481,18 @@ pub fn hash_raw_std(
     salt: &[u8],
     hash_len: u32
 ) -> Result<Vec<u8>> {
-    hash_raw(variant,
-             version,
-             mem_cost,
-             time_cost,
-             parallelism,
-             ThreadMode::Sequential,
-             pwd,
-             salt,
-             &[],
-             &[],
-             hash_len)
+    let config = Config {
+        variant: variant,
+        version: version,
+        mem_cost: mem_cost,
+        time_cost: time_cost,
+        lanes: parallelism,
+        thread_mode: ThreadMode::from_threads(parallelism),
+        secret: &[],
+        ad: &[],
+        hash_length: hash_len,
+    };
+    hash_raw(pwd, salt, &config)
 }
 
 /// Verifies the password with the encoded hash.
@@ -381,78 +510,135 @@ pub fn hash_raw_std(
 /// ```
 pub fn verify_encoded(encoded: &str, pwd: &[u8]) -> Result<bool> {
     let decoded = try!(encoding::decode_string(encoded));
-    verify_raw(decoded.variant,
-               decoded.version,
-               decoded.mem_cost,
-               decoded.time_cost,
-               decoded.parallelism,
-               ThreadMode::Parallel,
-               pwd,
-               &decoded.salt,
-               &[],
-               &[],
-               &decoded.hash)
+    let config = Config {
+        variant: decoded.variant,
+        version: decoded.version,
+        mem_cost: decoded.mem_cost,
+        time_cost: decoded.time_cost,
+        lanes: decoded.parallelism,
+        thread_mode: ThreadMode::from_threads(decoded.parallelism),
+        secret: &[],
+        ad: &[],
+        hash_length: decoded.hash.len() as u32,
+    };
+    verify_raw(pwd, &decoded.salt, &decoded.hash, &config)
 }
 
-/// Verifies the password with the supplied settings.
+/// Verifies the password with the supplied configuration.
 ///
 /// # Examples
 ///
 ///
 /// ```
-/// use argon2::{self, ThreadMode, Variant, Version};
+/// use argon2::{self, Config};
 ///
-/// let mem_cost = 4096;
-/// let time_cost = 3;
-/// let lanes = 1;
-/// let thread_mode = ThreadMode::Sequential;
 /// let pwd = b"password";
 /// let salt = b"somesalt";
-/// let secret = &[];
-/// let ad = &[];
 /// let hash = &[137, 104, 116, 234, 240, 252, 23, 45, 187, 193, 255, 103, 166,
 ///              126, 133, 93, 104, 130, 95, 130, 186, 165, 110, 148, 123, 80,
 ///              103, 207, 61, 59, 103, 192];
-/// let res = argon2::verify_raw(Variant::Argon2i,
-///                              Version::Version13,
-///                              mem_cost,
-///                              time_cost,
-///                              lanes,
-///                              thread_mode,
-///                              pwd,
-///                              salt,
-///                              secret,
-///                              ad,
-///                              hash).unwrap();
+/// let config = Config::default();
+/// let res = argon2::verify_raw(pwd, salt, hash, &config).unwrap();
 /// assert!(res);
 /// ```
-pub fn verify_raw(
+pub fn verify_raw(pwd: &[u8], salt: &[u8], hash: &[u8], config: &Config) -> Result<bool> {
+    let context = try!(Context::new(config.variant,
+                                    config.version,
+                                    config.mem_cost,
+                                    config.time_cost,
+                                    config.lanes,
+                                    config.thread_mode,
+                                    pwd.to_vec(),
+                                    salt.to_vec(),
+                                    config.secret.to_vec(),
+                                    config.ad.to_vec(),
+                                    hash.len() as u32));
+    Ok(run(&context) == hash)
+}
+
+/// Verifies the password with the supplied settings (pre 0.2.0 `verify_raw`).
+///
+/// # Examples
+///
+/// ```
+/// use argon2::{self, Variant, Version};
+///
+/// let pwd = b"password";
+/// let salt = b"somesalt";
+/// let hash = &[137, 104, 116, 234, 240, 252, 23, 45, 187, 193, 255, 103, 166,
+///              126, 133, 93, 104, 130, 95, 130, 186, 165, 110, 148, 123, 80,
+///              103, 207, 61, 59, 103, 192];
+/// let mem_cost = 4096;
+/// let time_cost = 3;
+/// let lanes = 1;
+/// let threads = 1;
+/// let secret = &[];
+/// let ad = &[];
+/// let res = argon2::verify_raw_old(Variant::Argon2i,
+///                                  Version::Version13,
+///                                  mem_cost,
+///                                  time_cost,
+///                                  lanes,
+///                                  threads,
+///                                  pwd,
+///                                  salt,
+///                                  secret,
+///                                  ad,
+///                                  hash).unwrap();
+/// assert!(res);
+/// ```
+///
+/// The above rewritten using the new `verify_raw`:
+///
+/// ```
+/// use argon2::{self, Config, ThreadMode, Variant, Version};
+///
+/// let pwd = b"password";
+/// let salt = b"somesalt";
+/// let hash = &[137, 104, 116, 234, 240, 252, 23, 45, 187, 193, 255, 103, 166,
+///              126, 133, 93, 104, 130, 95, 130, 186, 165, 110, 148, 123, 80,
+///              103, 207, 61, 59, 103, 192];
+/// let config = Config {
+///     variant: Variant::Argon2i,
+///     version: Version::Version13,
+///     mem_cost: 4096,
+///     time_cost: 3,
+///     lanes: 1,
+///     thread_mode: ThreadMode::Sequential,
+///     secret: &[],
+///     ad: &[],
+///     hash_length: hash.len() as u32,
+/// };
+/// let res = argon2::verify_raw(pwd, salt, hash, &config).unwrap();
+/// assert!(res);
+/// ```
+#[deprecated(since="0.2.0", note="please use new `verify_raw` instead")]
+pub fn verify_raw_old(
     variant: Variant,
     version: Version,
     mem_cost: u32,
     time_cost: u32,
     lanes: u32,
-    thread_mode: ThreadMode,
+    threads: u32,
     pwd: &[u8],
     salt: &[u8],
     secret: &[u8],
     ad: &[u8],
     hash: &[u8]
 ) -> Result<bool> {
-    let context = try!(Context::new(variant,
-                                    version,
-                                    mem_cost,
-                                    time_cost,
-                                    lanes,
-                                    thread_mode,
-                                    pwd.to_vec(),
-                                    salt.to_vec(),
-                                    secret.to_vec(),
-                                    ad.to_vec(),
-                                    hash.len() as u32));
-    Ok(run(&context) == hash)
+    let config = Config {
+        variant: variant,
+        version: version,
+        mem_cost: mem_cost,
+        time_cost: time_cost,
+        lanes: lanes,
+        thread_mode: ThreadMode::from_threads(threads),
+        secret: secret,
+        ad: ad,
+        hash_length: hash.len() as u32,
+    };
+    verify_raw(pwd, salt, hash, &config)
 }
-
 
 /// Verifies the password with the supplied settings (standard).
 ///
@@ -462,14 +648,14 @@ pub fn verify_raw(
 /// ```
 /// use argon2::{self, Variant, Version};
 ///
-/// let mem_cost = 4096;
-/// let time_cost = 3;
-/// let parallelism = 1;
 /// let pwd = b"password";
 /// let salt = b"somesalt";
 /// let hash = &[137, 104, 116, 234, 240, 252, 23, 45, 187, 193, 255, 103, 166,
 ///              126, 133, 93, 104, 130, 95, 130, 186, 165, 110, 148, 123, 80,
 ///              103, 207, 61, 59, 103, 192];
+/// let mem_cost = 4096;
+/// let time_cost = 3;
+/// let parallelism = 1;
 /// let res = argon2::verify_raw_std(Variant::Argon2i,
 ///                                  Version::Version13,
 ///                                  mem_cost,
@@ -480,6 +666,32 @@ pub fn verify_raw(
 ///                                  hash).unwrap();
 /// assert!(res);
 /// ```
+///
+/// The above rewritten using `verify_raw`:
+///
+/// ```
+/// use argon2::{self, Config, ThreadMode, Variant, Version};
+///
+/// let pwd = b"password";
+/// let salt = b"somesalt";
+/// let hash = &[137, 104, 116, 234, 240, 252, 23, 45, 187, 193, 255, 103, 166,
+///              126, 133, 93, 104, 130, 95, 130, 186, 165, 110, 148, 123, 80,
+///              103, 207, 61, 59, 103, 192];
+/// let config = Config {
+///     variant: Variant::Argon2i,
+///     version: Version::Version13,
+///     mem_cost: 4096,
+///     time_cost: 3,
+///     lanes: 1,
+///     thread_mode: ThreadMode::Sequential,
+///     secret: &[],
+///     ad: &[],
+///     hash_length: hash.len() as u32,
+/// };
+/// let res = argon2::verify_raw(pwd, salt, hash, &config).unwrap();
+/// assert!(res);
+/// ```
+#[deprecated(since="0.2.0", note="please use `verify_raw` instead")]
 pub fn verify_raw_std(
     variant: Variant,
     version: Version,
@@ -490,17 +702,18 @@ pub fn verify_raw_std(
     salt: &[u8],
     hash: &[u8]
 ) -> Result<bool> {
-    verify_raw(variant,
-               version,
-               mem_cost,
-               time_cost,
-               parallelism,
-               ThreadMode::Parallel,
-               pwd,
-               salt,
-               &[],
-               &[],
-               hash)
+    let config = Config {
+        variant: variant,
+        version: version,
+        mem_cost: mem_cost,
+        time_cost: time_cost,
+        lanes: parallelism,
+        thread_mode: ThreadMode::from_threads(parallelism),
+        secret: &[],
+        ad: &[],
+        hash_length: hash.len() as u32,
+    };
+    verify_raw(pwd, salt, hash, &config)
 }
 
 fn run(context: &Context) -> Vec<u8> {

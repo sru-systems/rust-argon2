@@ -17,7 +17,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! rust-argon2 = "0.1.0"
+//! rust-argon2 = "0.2.0"
 //! ```
 //!
 //! And the following to your crate root:
@@ -31,11 +31,12 @@
 //! Create a password hash using the defaults and verify it:
 //!
 //! ```rust
-//! use argon2;
+//! use argon2::{self, Config};
 //!
 //! let password = b"password";
 //! let salt = b"randomsalt";
-//! let hash = argon2::hash_encoded_defaults(password, salt).unwrap();
+//! let config = Config::default();
+//! let hash = argon2::hash_encoded(password, salt, &config).unwrap();
 //! let matches = argon2::verify_encoded(&hash, password).unwrap();
 //! assert!(matches);
 //! ```
@@ -43,24 +44,22 @@
 //! Create a password hash with custom settings and verify it:
 //!
 //! ```rust
-//! use argon2::{self, Variant, Version};
+//! use argon2::{self, Config, ThreadMode, Variant, Version};
 //!
-//! let variant = Variant::Argon2i;
-//! let version = Version::Version13;
-//! let memory_cost = 65536;
-//! let time_cost = 10;
-//! let parallelism = 1;
 //! let password = b"password";
 //! let salt = b"othersalt";
-//! let hash_length = 32;
-//! let hash = argon2::hash_encoded_std(variant,
-//!                                     version,
-//!                                     memory_cost,
-//!                                     time_cost,
-//!                                     parallelism,
-//!                                     password,
-//!                                     salt,
-//!                                     hash_length).unwrap();
+//! let config = Config {
+//!     variant: Variant::Argon2i,
+//!     version: Version::Version13,
+//!     mem_cost: 65536,
+//!     time_cost: 10,
+//!     lanes: 4,
+//!     thread_mode: ThreadMode::Parallel,
+//!     secret: &[],
+//!     ad: &[],
+//!     hash_length: 32
+//! };
+//! let hash = argon2::hash_encoded(password, salt, &config).unwrap();
 //! let matches = argon2::verify_encoded(&hash, password).unwrap();
 //! assert!(matches);
 //! ```
@@ -75,6 +74,27 @@
 //!
 //! This version uses the standard implementation and does not yet implement
 //! optimizations. Therefore, it is not the fastest implementation available.
+//!
+//!
+//! # History
+//!
+//! __Version 0.2.0__
+//!
+//! This version added a `Config` struct. Due to this struct the `hash_encoded`,
+//! `hash_raw` and `verify_raw` functions were changed in a non backward
+//! compatible way. However, the previous functionality is still available by
+//! using `hash_encoded_old`, `hash_raw_old` and `verify_raw_old`.
+//!
+//! The following functions are deprecated since this version:
+//!
+//! - `hash_encoded_defaults`
+//! - `hash_encoded_old`
+//! - `hash_encoded_std`
+//! - `hash_raw_defaults`
+//! - `hash_raw_old`
+//! - `hash_raw_std`
+//! - `verify_raw_old`
+//! - `verify_raw_std`
 
 
 extern crate blake2_rfc;
@@ -84,6 +104,7 @@ extern crate rustc_serialize;
 mod argon2;
 mod block;
 mod common;
+mod config;
 mod context;
 mod core;
 mod decoded;
@@ -96,6 +117,7 @@ mod variant;
 mod version;
 
 pub use argon2::*;
+pub use config::Config;
 pub use error::Error;
 pub use result::Result;
 pub use thread_mode::ThreadMode;

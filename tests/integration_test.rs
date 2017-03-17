@@ -11,7 +11,7 @@
 extern crate argon2;
 extern crate rustc_serialize;
 
-use argon2::{Error, Variant, Version};
+use argon2::{Error, Config, ThreadMode, Variant, Version};
 use rustc_serialize::hex::ToHex;
 
 #[test]
@@ -850,28 +850,40 @@ fn test_encoded_len_returns_correct_length() {
 }
 
 #[test]
-fn test_hash_raw_std_with_not_enough_memory() {
-    let res = argon2::hash_raw_std(Variant::Argon2i,
-                                   Version::Version13,
-                                   2,
-                                   2,
-                                   1,
-                                   b"password",
-                                   b"diffsalt",
-                                   32);
+fn test_hash_raw_with_not_enough_memory() {
+    let pwd = b"password";
+    let salt = b"diffsalt";
+    let config = Config {
+        variant: Variant::Argon2i,
+        version: Version::Version13,
+        mem_cost: 2,
+        time_cost: 2,
+        lanes: 1,
+        thread_mode: ThreadMode::Sequential,
+        secret: &[],
+        ad: &[],
+        hash_length: 32,
+    };
+    let res = argon2::hash_raw(pwd, salt, &config);
     assert_eq!(res, Err(Error::MemoryTooLittle));
 }
 
 #[test]
-fn test_hash_raw_std_with_too_short_salt() {
-    let res = argon2::hash_raw_std(Variant::Argon2i,
-                                   Version::Version13,
-                                   2048,
-                                   2,
-                                   1,
-                                   b"password",
-                                   b"s",
-                                   32);
+fn test_hash_raw_with_too_short_salt() {
+    let pwd = b"password";
+    let salt = b"s";
+    let config = Config {
+        variant: Variant::Argon2i,
+        version: Version::Version13,
+        mem_cost: 2048,
+        time_cost: 2,
+        lanes: 1,
+        thread_mode: ThreadMode::Sequential,
+        secret: &[],
+        ad: &[],
+        hash_length: 32,
+    };
+    let res = argon2::hash_raw(pwd, salt, &config);
     assert_eq!(res, Err(Error::SaltTooShort));
 }
 
@@ -886,11 +898,21 @@ fn hash_test(
     hex: &str,
     enc: &str
 ) {
-    let hash_len = 32;
-    let hash = argon2::hash_raw_std(var, ver, m, t, p, pwd, salt, hash_len).unwrap();
+    let config = Config {
+        variant: var,
+        version: ver,
+        mem_cost: m,
+        time_cost: t,
+        lanes: p,
+        thread_mode: ThreadMode::from_threads(p),
+        secret: &[],
+        ad: &[],
+        hash_length: 32
+    };
+    let hash = argon2::hash_raw(pwd, salt, &config).unwrap();
     assert_eq!(hash.to_hex(), hex);
 
-    let encoded = argon2::hash_encoded_std(var, ver, m, t, p, pwd, salt, hash_len).unwrap();
+    let encoded = argon2::hash_encoded(pwd, salt, &config).unwrap();
     let result = argon2::verify_encoded(encoded.as_str(), pwd).unwrap();
     assert!(result);
 
