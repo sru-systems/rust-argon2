@@ -86,17 +86,7 @@ pub fn encoded_len(
 /// let encoded = argon2::hash_encoded(pwd, salt, &config).unwrap();
 /// ```
 pub fn hash_encoded(pwd: &[u8], salt: &[u8], config: &Config) -> Result<String> {
-    let context = try!(Context::new(config.variant,
-                                    config.version,
-                                    config.mem_cost,
-                                    config.time_cost,
-                                    config.lanes,
-                                    config.thread_mode,
-                                    pwd,
-                                    salt,
-                                    config.secret,
-                                    config.ad,
-                                    config.hash_length));
+    let context = try!(Context::new(config.clone(), pwd, salt));
     let hash = run(&context);
     let encoded = encoding::encode_string(&context, &hash);
     Ok(encoded)
@@ -306,17 +296,7 @@ pub fn hash_encoded_std(
 /// let vec = argon2::hash_raw(pwd, salt, &config).unwrap();
 /// ```
 pub fn hash_raw(pwd: &[u8], salt: &[u8], config: &Config) -> Result<Vec<u8>> {
-    let context = try!(Context::new(config.variant,
-                                    config.version,
-                                    config.mem_cost,
-                                    config.time_cost,
-                                    config.lanes,
-                                    config.thread_mode,
-                                    pwd,
-                                    salt,
-                                    config.secret,
-                                    config.ad,
-                                    config.hash_length));
+    let context = try!(Context::new(config.clone(), pwd, salt));
     let hash = run(&context);
     Ok(hash)
 }
@@ -542,17 +522,11 @@ pub fn verify_encoded(encoded: &str, pwd: &[u8]) -> Result<bool> {
 /// assert!(res);
 /// ```
 pub fn verify_raw(pwd: &[u8], salt: &[u8], hash: &[u8], config: &Config) -> Result<bool> {
-    let context = try!(Context::new(config.variant,
-                                    config.version,
-                                    config.mem_cost,
-                                    config.time_cost,
-                                    config.lanes,
-                                    config.thread_mode,
-                                    pwd,
-                                    salt,
-                                    config.secret,
-                                    config.ad,
-                                    hash.len() as u32));
+    let config = Config {
+        hash_length: hash.len() as u32,
+        ..config.clone()
+    };
+    let context = try!(Context::new(config, pwd, salt));
     Ok(run(&context) == hash)
 }
 
@@ -717,7 +691,7 @@ pub fn verify_raw_std(
 }
 
 fn run(context: &Context) -> Vec<u8> {
-    let mut memory = Memory::new(context.lanes, context.lane_length);
+    let mut memory = Memory::new(context.config.lanes, context.lane_length);
     core::initialize(context, &mut memory);
     core::fill_memory_blocks(context, &mut memory);
     core::finalize(context, &memory)
