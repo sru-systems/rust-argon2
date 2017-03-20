@@ -13,7 +13,6 @@ use super::block::Block;
 use super::common;
 use super::context::Context;
 use super::memory::Memory;
-use super::thread_mode::ThreadMode;
 use super::variant::Variant;
 use super::version::Version;
 
@@ -33,7 +32,7 @@ pub fn initialize(context: &Context, memory: &mut Memory) {
 
 /// Fills all the memory blocks.
 pub fn fill_memory_blocks(context: &Context, memory: &mut Memory) {
-    if context.thread_mode == ThreadMode::Sequential || context.lanes == 1 {
+    if context.config.uses_sequential() {
         fill_memory_blocks_st(context, memory);
     } else {
         fill_memory_blocks_mt(context, memory);
@@ -43,12 +42,12 @@ pub fn fill_memory_blocks(context: &Context, memory: &mut Memory) {
 /// Calculates the final hash and returns it.
 pub fn finalize(context: &Context, memory: &Memory) -> Vec<u8> {
     let mut blockhash = memory[context.lane_length - 1].clone();
-    for l in 1..context.lanes {
+    for l in 1..context.config.lanes {
         let last_block_in_lane = l * context.lane_length + (context.lane_length - 1);
         blockhash ^= &memory[last_block_in_lane];
     }
 
-    let mut hash = vec![0u8; context.hash_length as usize];
+    let mut hash = vec![0u8; context.config.hash_length as usize];
     hprime(hash.as_mut_slice(), blockhash.as_u8());
     hash
 }
@@ -195,7 +194,7 @@ fn fill_block(prev_block: &Block, ref_block: &Block, next_block: &mut Block, wit
 }
 
 fn fill_first_blocks(context: &Context, memory: &mut Memory, h0: &mut [u8]) {
-    for lane in 0..context.lanes {
+    for lane in 0..context.config.lanes {
         let start = common::PREHASH_DIGEST_LENGTH;
         // H'(H0||0||i)
         h0[start..(start + 4)].clone_from_slice(&u32_as_32le(0));
@@ -209,9 +208,9 @@ fn fill_first_blocks(context: &Context, memory: &mut Memory, h0: &mut [u8]) {
 }
 
 fn fill_memory_blocks_mt(context: &Context, memory: &mut Memory) {
-    for p in 0..context.time_cost {
+    for p in 0..context.config.time_cost {
         for s in 0..common::SYNC_POINTS {
-            scope(|scoped| for (l, mem) in (0..context.lanes).zip(memory.as_lanes_mut()) {
+            scope(|scoped| for (l, mem) in (0..context.config.lanes).zip(memory.as_lanes_mut()) {
                 let position = Position {
                     pass: p,
                     lane: l,
@@ -225,9 +224,9 @@ fn fill_memory_blocks_mt(context: &Context, memory: &mut Memory) {
 }
 
 fn fill_memory_blocks_st(context: &Context, memory: &mut Memory) {
-    for p in 0..context.time_cost {
+    for p in 0..context.config.time_cost {
         for s in 0..common::SYNC_POINTS {
-            for l in 0..context.lanes {
+            for l in 0..context.config.lanes {
                 let position = Position {
                     pass: p,
                     lane: l,
@@ -242,8 +241,8 @@ fn fill_memory_blocks_st(context: &Context, memory: &mut Memory) {
 
 fn fill_segment(context: &Context, position: &Position, memory: &mut Memory) {
     let mut position = position.clone();
-    let data_independent_addressing = (context.variant == Variant::Argon2i) ||
-                                      (context.variant == Variant::Argon2id &&
+    let data_independent_addressing = (context.config.variant == Variant::Argon2i) ||
+                                      (context.config.variant == Variant::Argon2id &&
                                        position.pass == 0) &&
                                       (position.slice < (common::SYNC_POINTS / 2));
     let zero_block = Block::zero();
@@ -255,8 +254,8 @@ fn fill_segment(context: &Context, position: &Position, memory: &mut Memory) {
         input_block[1] = position.lane as u64;
         input_block[2] = position.slice as u64;
         input_block[3] = context.memory_blocks as u64;
-        input_block[4] = context.time_cost as u64;
-        input_block[5] = context.variant.as_u64();
+        input_block[4] = context.config.time_cost as u64;
+        input_block[5] = context.config.variant.as_u64();
     }
 
     let mut starting_index = 0u32;
@@ -300,7 +299,7 @@ fn fill_segment(context: &Context, position: &Position, memory: &mut Memory) {
         }
 
         // 1.2.2 Computing the lane of the reference block
-        let mut ref_lane = ((pseudo_rand >> 32)) % context.lanes as u64;
+        let mut ref_lane = ((pseudo_rand >> 32)) % context.config.lanes as u64;
         if (position.pass == 0) && (position.slice == 0) {
             // Can not reference other lanes yet
             ref_lane = position.lane as u64;
@@ -318,7 +317,7 @@ fn fill_segment(context: &Context, position: &Position, memory: &mut Memory) {
         {
             let ref prev_block = memory[prev_offset];
             let ref ref_block = memory[index];
-            if context.version == Version::Version10 {
+            if context.config.version == Version::Version10 {
                 fill_block(prev_block, ref_block, &mut curr_block, false);
             } else {
                 if position.pass == 0 {
@@ -347,20 +346,20 @@ fn g(a: &mut u64, b: &mut u64, c: &mut u64, d: &mut u64) {
 }
 
 fn h0(context: &Context) -> [u8; common::PREHASH_SEED_LENGTH] {
-    let input = [&u32_as_32le(context.lanes),
-                 &u32_as_32le(context.hash_length),
-                 &u32_as_32le(context.mem_cost),
-                 &u32_as_32le(context.time_cost),
-                 &u32_as_32le(context.version.as_u32()),
-                 &u32_as_32le(context.variant.as_u32()),
+    let input = [&u32_as_32le(context.config.lanes),
+                 &u32_as_32le(context.config.hash_length),
+                 &u32_as_32le(context.config.mem_cost),
+                 &u32_as_32le(context.config.time_cost),
+                 &u32_as_32le(context.config.version.as_u32()),
+                 &u32_as_32le(context.config.variant.as_u32()),
                  &len_as_32le(context.pwd),
                  context.pwd.as_ref(),
                  &len_as_32le(context.salt),
                  context.salt.as_ref(),
-                 &len_as_32le(context.secret),
-                 context.secret.as_ref(),
-                 &len_as_32le(context.ad),
-                 context.ad.as_ref()];
+                 &len_as_32le(context.config.secret),
+                 context.config.secret.as_ref(),
+                 &len_as_32le(context.config.ad),
+                 context.config.ad.as_ref()];
     let mut out = [0u8; common::PREHASH_SEED_LENGTH];
     blake2b(&mut out[0..common::PREHASH_DIGEST_LENGTH], &input);
     out

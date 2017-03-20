@@ -29,7 +29,7 @@ use super::version::Version;
 /// assert_eq!(config.variant, Variant::Argon2i);
 /// assert_eq!(config.version, Version::Version13);
 /// ```
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Config<'a> {
     /// The associated data.
     pub ad: &'a [u8],
@@ -57,6 +57,12 @@ pub struct Config<'a> {
 
     /// The version number.
     pub version: Version,
+}
+
+impl<'a> Config<'a> {
+    pub fn uses_sequential(&self) -> bool {
+        self.thread_mode == ThreadMode::Sequential || self.lanes == 1
+    }
 }
 
 impl<'a> Default for Config<'a> {

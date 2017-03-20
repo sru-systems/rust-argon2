@@ -6,7 +6,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use rustc_serialize::base64::{CharacterSet, Config, FromBase64, Newline, ToBase64};
+use rustc_serialize::base64::{CharacterSet, Config as Base64Config};
+use rustc_serialize::base64::{FromBase64, Newline, ToBase64};
 use super::context::Context;
 use super::decoded::Decoded;
 use super::error::Error;
@@ -14,7 +15,7 @@ use super::result::Result;
 use super::variant::Variant;
 use super::version::Version;
 
-static BASE64_CONFIG: Config = Config {
+static BASE64_CONFIG: Base64Config = Base64Config {
     char_set: CharacterSet::Standard,
     newline: Newline::CRLF,
     pad: false,
@@ -149,11 +150,11 @@ fn decode_version(str: &str) -> Result<Version> {
 pub fn encode_string(context: &Context, hash: &Vec<u8>) -> String {
     format!(
         "${}$v={}$m={},t={},p={}${}${}",
-        context.variant,
-        context.version,
-        context.mem_cost,
-        context.time_cost,
-        context.lanes,
+        context.config.variant,
+        context.config.version,
+        context.config.mem_cost,
+        context.config.time_cost,
+        context.config.lanes,
         context.salt.to_base64(BASE64_CONFIG),
         hash.to_base64(BASE64_CONFIG),
     )
@@ -174,6 +175,7 @@ pub fn num_len(number: u32) -> u32 {
 #[cfg(test)]
 mod tests {
 
+    use config::Config;
     use context::Context;
     use decoded::Decoded;
     use error::Error;
@@ -366,28 +368,20 @@ mod tests {
     #[test]
     fn encode_string_returns_correct_string() {
         let hash = b"12345678901234567890123456789012".to_vec();
-        let variant = Variant::Argon2i;
-        let version = Version::Version13;
-        let mem_cost = 4096;
-        let time_cost = 3;
-        let parallelism = 1;
+        let config = Config {
+            ad: &[],
+            hash_length: hash.len() as u32,
+            lanes: 1,
+            mem_cost: 4096,
+            secret: &[],
+            thread_mode: ThreadMode::Parallel,
+            time_cost: 3,
+            variant: Variant::Argon2i,
+            version: Version::Version13,
+        };
         let pwd = b"password".to_vec();
         let salt = b"salt1234".to_vec();
-        let secret = Vec::new();
-        let ad = Vec::new();
-        let hash_length = hash.len() as u32;
-        let context = Context::new(variant,
-                                   version,
-                                   mem_cost,
-                                   time_cost,
-                                   parallelism,
-                                   ThreadMode::Parallel,
-                                   &pwd,
-                                   &salt,
-                                   &secret,
-                                   &ad,
-                                   hash_length)
-            .unwrap();
+        let context = Context::new(config, &pwd, &salt).unwrap();
         let expected = "$argon2i$v=19$m=4096,t=3,p=1\
                         $c2FsdDEyMzQ$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI";
         let actual = encode_string(&context, &hash);
