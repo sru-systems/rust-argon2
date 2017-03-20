@@ -62,6 +62,9 @@ pub enum Error {
     /// Incorrect Argon2 variant.
     IncorrectType,
 
+    /// Incorrect Argon2 version.
+    IncorrectVersion,
+
     /// The decoding of the encoded data has failed.
     DecodingFail,
 }
@@ -85,7 +88,8 @@ impl Error {
             Error::MemoryTooMuch => "Memory cost is too large",
             Error::LanesTooFew => "Too few lanes",
             Error::LanesTooMany => "Too many lanes",
-            Error::IncorrectType => "There is no such version of Argon2",
+            Error::IncorrectType => "There is no such type of Argon2",
+            Error::IncorrectVersion => "There is no such version of Argon2",
             Error::DecodingFail => "Decoding failed",
         }
     }

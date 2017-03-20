@@ -11,7 +11,6 @@ use super::error::Error;
 use super::result::Result;
 
 /// The Argon2 version.
-#[repr(C)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq, PartialOrd, Ord)]
 pub enum Version {
     /// Version 0x10.
@@ -33,6 +32,15 @@ impl Version {
             "16" => Ok(Version::Version10),
             "19" => Ok(Version::Version13),
             _ => Err(Error::DecodingFail),
+        }
+    }
+
+    /// Attempts to create a version from an u32.
+    pub fn from_u32(val: u32) -> Result<Version> {
+        match val {
+            0x10 => Ok(Version::Version10),
+            0x13 => Ok(Version::Version13),
+            _ => Err(Error::IncorrectVersion),
         }
     }
 }
@@ -78,5 +86,12 @@ mod tests {
         assert_eq!(Version::from_str("16"), Ok(Version::Version10));
         assert_eq!(Version::from_str("19"), Ok(Version::Version13));
         assert_eq!(Version::from_str("11"), Err(Error::DecodingFail));
+    }
+
+    #[test]
+    fn from_u32_returns_correct_result() {
+        assert_eq!(Version::from_u32(0x10), Ok(Version::Version10));
+        assert_eq!(Version::from_u32(0x13), Ok(Version::Version13));
+        assert_eq!(Version::from_u32(0), Err(Error::IncorrectVersion));
     }
 }

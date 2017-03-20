@@ -11,7 +11,6 @@ use super::error::Error;
 use super::result::Result;
 
 /// The Argon2 variant.
-#[repr(C)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq, PartialOrd, Ord)]
 pub enum Variant {
     /// Argon2 using data-dependent memory access to thwart tradeoff attacks.
