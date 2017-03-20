@@ -11,19 +11,20 @@ use super::error::Error;
 use super::result::Result;
 
 /// The Argon2 variant.
+#[repr(C)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq, PartialOrd, Ord)]
 pub enum Variant {
     /// Argon2 using data-dependent memory access to thwart tradeoff attacks.
     /// Recommended for cryptocurrencies and backend servers.
-    Argon2d,
+    Argon2d = 0,
 
     /// Argon2 using data-independent memory access to thwart side-channel
     /// attacks. Recommended for password hashing and password-based key
     /// derivation.
-    Argon2i,
+    Argon2i = 1,
 
     /// Argon2 using hybrid construction.
-    Argon2id,
+    Argon2id = 2,
 }
 
 impl Variant {
@@ -38,20 +39,12 @@ impl Variant {
 
     /// Gets the u32 representation of the variant.
     pub fn as_u32(&self) -> u32 {
-        match *self {
-            Variant::Argon2d => 0,
-            Variant::Argon2i => 1,
-            Variant::Argon2id => 2,
-        }
+        *self as u32
     }
 
     /// Gets the u64 representation of the variant.
     pub fn as_u64(&self) -> u64 {
-        match *self {
-            Variant::Argon2d => 0,
-            Variant::Argon2i => 1,
-            Variant::Argon2id => 2,
-        }
+        *self as u64
     }
 
     /// Gets the uppercase string slice representation of the variant.

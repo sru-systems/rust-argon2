@@ -11,22 +11,20 @@ use super::error::Error;
 use super::result::Result;
 
 /// The Argon2 version.
+#[repr(C)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq, PartialOrd, Ord)]
 pub enum Version {
     /// Version 0x10.
-    Version10,
+    Version10 = 0x10,
 
     /// Version 0x13 (Recommended).
-    Version13,
+    Version13 = 0x13,
 }
 
 impl Version {
     /// Gets the u32 representation of the version.
     pub fn as_u32(&self) -> u32 {
-        match *self {
-            Version::Version10 => 0x10,
-            Version::Version13 => 0x13,
-        }
+        *self as u32
     }
 
     /// Attempts to create a version from a string slice.
