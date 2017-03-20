@@ -8,13 +8,14 @@
 
 // These tests are based on Argon's test.c test suite.
 
+#![cfg(not(debug_assertions))]
+
 extern crate argon2;
 extern crate rustc_serialize;
 
 use argon2::{Error, Config, ThreadMode, Variant, Version};
 use rustc_serialize::hex::ToHex;
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2d_version10_1() {
     hash_test(Variant::Argon2d,
@@ -29,7 +30,6 @@ fn test_argon2d_version10_1() {
                $LsDZJTWPWDDK8MHMij7lizRQV1lCi4WcebckFfUfkiE");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2d_version10_2() {
     hash_test(Variant::Argon2d,
@@ -44,7 +44,6 @@ fn test_argon2d_version10_2() {
                $KK4NEDeZG1X67BhCUnTV+RabL0S+4ZtFt6Vh1InWAZo");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2d_version10_3() {
     hash_test(Variant::Argon2d,
@@ -87,7 +86,6 @@ fn test_argon2d_version10_5() {
                $apHQK5+IVLoIQfBKpuU8HTN0wKDGRrjkMbA96AW5HsM");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2d_version10_6() {
     hash_test(Variant::Argon2d,
@@ -102,7 +100,6 @@ fn test_argon2d_version10_6() {
                $BdHQqF9JnpOXucHJNrIPNmpyc8zyWeLt/bRMqPht0R8");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2d_version10_7() {
     hash_test(Variant::Argon2d,
@@ -117,7 +114,6 @@ fn test_argon2d_version10_7() {
                $meeH+s7SCUnfWjuchiBxK0XP6gYXFq34sT77f+7kQIQ");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2d_version10_8() {
     hash_test(Variant::Argon2d,
@@ -132,7 +128,6 @@ fn test_argon2d_version10_8() {
                $ucLkpOyabbmcpOK1Sd1kJWMFuVdUsKcK11fNH/fu1KQ");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2d_version10_9() {
     hash_test(Variant::Argon2d,
@@ -147,7 +142,6 @@ fn test_argon2d_version10_9() {
                $0doUGWwjPgo8toeqbmxGXLUGaf/biRFYwrdXIjlfFNU");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2d_version13_1() {
     hash_test(Variant::Argon2d,
@@ -162,7 +156,6 @@ fn test_argon2d_version13_1() {
                $lV5dWxY6G2C7o1/DbQSWR0+6T2tZrVNihmbwf7L5Pq8");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2d_version13_2() {
     hash_test(Variant::Argon2d,
@@ -177,7 +170,6 @@ fn test_argon2d_version13_2() {
                $wtaApuesG3XiwrHl5xsXAVhIaUku/qSnbMyR/sYi0a4");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2d_version13_3() {
     hash_test(Variant::Argon2d,
@@ -220,7 +212,6 @@ fn test_argon2d_version13_5() {
                $e2nJLXw4iarRKB28i678Esw3yA8cdeM+8sLUDCjrxXM");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2d_version13_6() {
     hash_test(Variant::Argon2d,
@@ -235,7 +226,6 @@ fn test_argon2d_version13_6() {
                $gZNwjAMPCbEhUmsO/f/Oc4/vDdsTk3pl1D8/HquaqAI");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2d_version13_7() {
     hash_test(Variant::Argon2d,
@@ -250,7 +240,6 @@ fn test_argon2d_version13_7() {
                $zR4oFs+Ilf/+U1uHt6CqNhL3PGzgY96Dsee0Yhygr+Y");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2d_version13_8() {
     hash_test(Variant::Argon2d,
@@ -265,7 +254,6 @@ fn test_argon2d_version13_8() {
                $o02vyJMYLVIa5Ge7/c5g+XOhIjxGFWVO/rC/74qTDiU");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2d_version13_9() {
     hash_test(Variant::Argon2d,
@@ -280,7 +268,6 @@ fn test_argon2d_version13_9() {
                $8A64qZmhxpScYfu+48POzlBm4/9cea7UISZgVeK/Tdc");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2i_version10_1() {
     hash_test(Variant::Argon2i,
@@ -295,7 +282,6 @@ fn test_argon2i_version10_1() {
                $9sTbSlTio3Biev89thdrlKKiCaYsjjYVJxGAL3swxpQ");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2i_version10_2() {
     hash_test(Variant::Argon2i,
@@ -310,7 +296,6 @@ fn test_argon2i_version10_2() {
                $lpDsVdKNPtMlYvLnPqYrArAYdXZDoq5ueVKEWd6BBuk");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2i_version10_3() {
     hash_test(Variant::Argon2i,
@@ -353,7 +338,6 @@ fn test_argon2i_version10_5() {
                $tsEVYKap1h6scGt5ovl9aLRGOqOth+AMB+KwHpDFZPs");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2i_version10_6() {
     hash_test(Variant::Argon2i,
@@ -368,7 +352,6 @@ fn test_argon2i_version10_6() {
                $gWMFUrjzsfSM2xmSxMZ4ZD1JCytetP9sSzQ4tWIXJLI");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2i_version10_7() {
     hash_test(Variant::Argon2i,
@@ -383,7 +366,6 @@ fn test_argon2i_version10_7() {
                $8hLwFhXm6110c03D70Ct4tUdBSRo2MaUQKOh8sHChHs");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2i_version10_8() {
     hash_test(Variant::Argon2i,
@@ -398,7 +380,6 @@ fn test_argon2i_version10_8() {
                $6ckCB0tnVFMaOgvlGeW69ASzDOabPwGsO/ISKZYBCaM");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2i_version10_9() {
     hash_test(Variant::Argon2i,
@@ -413,7 +394,6 @@ fn test_argon2i_version10_9() {
                $eaEDuQ/orvhXDLMfyLIiWXeJFvgza3vaw4kladTxxJc");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2i_version13_1() {
     hash_test(Variant::Argon2i,
@@ -428,7 +408,6 @@ fn test_argon2i_version13_1() {
                $wWKIMhR9lyDFvRz9YTZweHKfbftvj+qf+YFY4NeBbtA");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2i_version13_2() {
     hash_test(Variant::Argon2i,
@@ -443,7 +422,6 @@ fn test_argon2i_version13_2() {
                $0Vh6ygkiw7XWqD7asxvuPE667zQu1hJ6VdGbI1GtH0E");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2i_version13_3() {
     hash_test(Variant::Argon2i,
@@ -486,7 +464,6 @@ fn test_argon2i_version13_5() {
                $T/XOJ2mh1/TIpJHfCdQan76Q5esCFVoT5MAeIM1Oq2E");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2i_version13_6() {
     hash_test(Variant::Argon2i,
@@ -501,7 +478,6 @@ fn test_argon2i_version13_6() {
                $0WgHXE2YXhPr6uVgz4uUw7XYoWxRkWtvSsLaOsEbvs8");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2i_version13_7() {
     hash_test(Variant::Argon2i,
@@ -516,7 +492,6 @@ fn test_argon2i_version13_7() {
                $qqlT1YrzcGzj3xrv1KZKhOMdf1QXUjHxKFJZ+IF0zls");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2i_version13_8() {
     hash_test(Variant::Argon2i,
@@ -531,7 +506,6 @@ fn test_argon2i_version13_8() {
                $FK6NoBr+qHAMI1jc73xTWNkCEoK9iGY6RWL1n7dNIu4");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2i_version13_9() {
     hash_test(Variant::Argon2i,
@@ -546,7 +520,6 @@ fn test_argon2i_version13_9() {
                $sDV8zPvvkfOGCw26RHsjSMvv7K2vmQq/6cxAcmxSEnE");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2id_version10_1() {
     hash_test(Variant::Argon2id,
@@ -561,7 +534,6 @@ fn test_argon2id_version10_1() {
                $mA69JKTmZ/FjRvnUp4sXVyh4NhPgzG+xfC7IhLFkNd8");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2id_version10_2() {
     hash_test(Variant::Argon2id,
@@ -576,7 +548,6 @@ fn test_argon2id_version10_2() {
                $zmIvwgU6zSJMBue+Ei+elVS2K4pBSwMgVrRhI0IuMqs");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2id_version10_3() {
     hash_test(Variant::Argon2id,
@@ -619,7 +590,6 @@ fn test_argon2id_version10_5() {
                $+Kq7UxXGPN3Ns7SgIVUJKOUlaZ2o/L0cKwsczTXMh6c");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2id_version10_6() {
     hash_test(Variant::Argon2id,
@@ -634,7 +604,6 @@ fn test_argon2id_version10_6() {
                $jg8xBAepiQE6gj3vvWy65U2Gs10awW5PiOtGReE1eVY");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2id_version10_7() {
     hash_test(Variant::Argon2id,
@@ -649,7 +618,6 @@ fn test_argon2id_version10_7() {
                $FmU0JuWCFD2moP912qyfqUwhrCwiHJa9NkWlwVwtlio");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2id_version10_8() {
     hash_test(Variant::Argon2id,
@@ -664,7 +632,6 @@ fn test_argon2id_version10_8() {
                $dXCdTJaiwjVpanfu/uzzPmQiH0cLJhd8GeXidkJhLbs");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2id_version10_9() {
     hash_test(Variant::Argon2id,
@@ -679,7 +646,6 @@ fn test_argon2id_version10_9() {
                $8LV8/gOp14xHAOL+gCACNDZgpWsbXSHq14jmu0TvSNM");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2id_version13_1() {
     hash_test(Variant::Argon2id,
@@ -694,7 +660,6 @@ fn test_argon2id_version13_1() {
                $CTFhFdXPJO1aFaMaO6Mm5c8y7cJHAph8ArZWb2GRPPc");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2id_version13_2() {
     hash_test(Variant::Argon2id,
@@ -709,7 +674,6 @@ fn test_argon2id_version13_2() {
                $FqHLigYc8fixb7GV/lWfptFDXkPd7S9PsHKTF2vokvo");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2id_version13_3() {
     hash_test(Variant::Argon2id,
@@ -752,7 +716,6 @@ fn test_argon2id_version13_5() {
                $bQk8UB/VmZZF4Oo79iDXuL5/0ttZwg2f/5U52iv1cDc");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2id_version13_6() {
     hash_test(Variant::Argon2id,
@@ -767,7 +730,6 @@ fn test_argon2id_version13_6() {
                $9qWtwbpyPd3vm1rB1GThgPzZ3/ydHL92zKL+15XZypg");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2id_version13_7() {
     hash_test(Variant::Argon2id,
@@ -782,7 +744,6 @@ fn test_argon2id_version13_7() {
                $kCXUjmjvc5XMqQedpMTsOv+zyJEf5PhtGiUghW9jFyw");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2id_version13_8() {
     hash_test(Variant::Argon2id,
@@ -797,7 +758,6 @@ fn test_argon2id_version13_8() {
                $C4TWUs9rDEvq7w3+J4umqA32aWKB1+DSiRuBfYxFj94");
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_argon2id_version13_9() {
     hash_test(Variant::Argon2id,
@@ -866,7 +826,6 @@ fn test_verify_encoded_with_too_short_salt_version13() {
     assert_eq!(res, Err(Error::SaltTooShort));
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_verify_encoded_with_wrong_password_version10() {
     let encoded = "$argon2i$m=65536,t=2,p=1$c29tZXNhbHQ\
@@ -876,7 +835,6 @@ fn test_verify_encoded_with_wrong_password_version10() {
     assert_eq!(res, Ok(false));
 }
 
-#[cfg(not(debug_assertions))]
 #[test]
 fn test_verify_encoded_with_wrong_password_version13() {
     let encoded = "$argon2i$v=19$m=65536,t=2,p=1$c29tZXNhbHQ\
