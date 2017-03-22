@@ -1,10 +1,10 @@
 [package]
 name = "rust-argon2"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Martijn Rijkeboer <mrr@sru-systems.com>"]
 license = "MIT/Apache-2.0"
 description = "Rust implementation of the Argon2 password hashing function."
-documentation = "https://docs.sru-systems.com/rust-argon2/0.2.0/argon2/"
+documentation = "https://docs.sru-systems.com/rust-argon2/0.3.0/argon2/"
 homepage = "https://github.com/sru-systems/rust-argon2"
 repository = "https://github.com/sru-systems/rust-argon2"
 readme = "README.md"
