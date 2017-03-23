@@ -10,4 +10,4 @@ script:
   - cargo build --verbose
   - cargo test --verbose
   - cargo build --release --verbose
-  - cargo test --release --verbose -- --test-threads=1
+  - cargo test --release --test integration_test --verbose -- --test-threads=2
