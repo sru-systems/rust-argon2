@@ -9,10 +9,10 @@
 // These tests are based on Argon's test.c test suite.
 
 extern crate argon2;
-extern crate rustc_serialize;
+extern crate hex;
 
 use argon2::{Error, Config, ThreadMode, Variant, Version};
-use rustc_serialize::hex::ToHex;
+use hex::ToHex;
 
 #[cfg(not(debug_assertions))]
 #[test]
