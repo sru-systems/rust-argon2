@@ -43,12 +43,12 @@ pub fn base64_len(length: u32) -> u32 {
 pub fn decode_string(encoded: &str) -> Result<Decoded> {
     let items: Vec<&str> = encoded.split('$').collect();
     if items.len() == 6 {
-        try!(decode_empty(items[0]));
-        let variant = try!(decode_variant(items[1]));
-        let version = try!(decode_version(items[2]));
-        let options = try!(decode_options(items[3]));
-        let salt = try!(decode_base64(items[4]));
-        let hash = try!(decode_base64(items[5]));
+        decode_empty(items[0])?;
+        let variant = decode_variant(items[1])?;
+        let version = decode_version(items[2])?;
+        let options = decode_options(items[3])?;
+        let salt = decode_base64(items[4])?;
+        let hash = decode_base64(items[5])?;
 
         Ok(Decoded {
             variant: variant,
@@ -60,11 +60,11 @@ pub fn decode_string(encoded: &str) -> Result<Decoded> {
             hash: hash,
         })
     } else if items.len() == 5 {
-        try!(decode_empty(items[0]));
-        let variant = try!(decode_variant(items[1]));
-        let options = try!(decode_options(items[2]));
-        let salt = try!(decode_base64(items[3]));
-        let hash = try!(decode_base64(items[4]));
+        decode_empty(items[0])?;
+        let variant = decode_variant(items[1])?;
+        let options = decode_options(items[2])?;
+        let salt = decode_base64(items[3])?;
+        let hash = decode_base64(items[4])?;
 
         Ok(Decoded {
             variant: variant,
@@ -100,9 +100,9 @@ fn decode_options(str: &str) -> Result<Options> {
     let items: Vec<&str> = str.split(',').collect();
     if items.len() == 3 {
         Ok(Options {
-            mem_cost: try!(decode_option(items[0], "m")),
-            time_cost: try!(decode_option(items[1], "t")),
-            parallelism: try!(decode_option(items[2], "p")),
+            mem_cost: decode_option(items[0], "m")?,
+            time_cost: decode_option(items[1], "t")?,
+            parallelism: decode_option(items[2], "p")?,
         })
     } else {
         Err(Error::DecodingFail)
