@@ -6,21 +6,13 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use rustc_serialize::base64::{CharacterSet, Config as Base64Config};
-use rustc_serialize::base64::{FromBase64, Newline, ToBase64};
+use base64;
 use super::context::Context;
 use super::decoded::Decoded;
 use super::error::Error;
 use super::result::Result;
 use super::variant::Variant;
 use super::version::Version;
-
-static BASE64_CONFIG: Base64Config = Base64Config {
-    char_set: CharacterSet::Standard,
-    newline: Newline::CRLF,
-    pad: false,
-    line_length: None,
-};
 
 /// Structure containing the options.
 struct Options {
@@ -47,8 +39,8 @@ pub fn decode_string(encoded: &str) -> Result<Decoded> {
         let variant = try!(decode_variant(items[1]));
         let version = try!(decode_version(items[2]));
         let options = try!(decode_options(items[3]));
-        let salt = try!(decode_base64(items[4]));
-        let hash = try!(decode_base64(items[5]));
+        let salt = try!(base64::decode(items[4]));
+        let hash = try!(base64::decode(items[5]));
 
         Ok(Decoded {
             variant: variant,
@@ -63,8 +55,8 @@ pub fn decode_string(encoded: &str) -> Result<Decoded> {
         try!(decode_empty(items[0]));
         let variant = try!(decode_variant(items[1]));
         let options = try!(decode_options(items[2]));
-        let salt = try!(decode_base64(items[3]));
-        let hash = try!(decode_base64(items[4]));
+        let salt = try!(base64::decode(items[3]));
+        let hash = try!(base64::decode(items[4]));
 
         Ok(Decoded {
             variant: variant,
@@ -79,13 +71,6 @@ pub fn decode_string(encoded: &str) -> Result<Decoded> {
         return Err(Error::DecodingFail);
     }
 
-}
-
-fn decode_base64(str: &str) -> Result<Vec<u8>> {
-    match str.from_base64() {
-        Ok(bytes) => Ok(bytes),
-        Err(_) => Err(Error::DecodingFail),
-    }
 }
 
 fn decode_empty(str: &str) -> Result<()> {
@@ -155,8 +140,8 @@ pub fn encode_string(context: &Context, hash: &Vec<u8>) -> String {
         context.config.mem_cost,
         context.config.time_cost,
         context.config.lanes,
-        context.salt.to_base64(BASE64_CONFIG),
-        hash.to_base64(BASE64_CONFIG),
+        base64::encode(context.salt),
+        base64::encode(hash),
     )
 }
 
@@ -383,7 +368,7 @@ mod tests {
         let salt = b"salt1234".to_vec();
         let context = Context::new(config, &pwd, &salt).unwrap();
         let expected = "$argon2i$v=19$m=4096,t=3,p=1\
-                        $c2FsdDEyMzQ$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI";
+                        $c2FsdDEyMzQ=$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=";
         let actual = encode_string(&context, &hash);
         assert_eq!(actual, expected);
     }

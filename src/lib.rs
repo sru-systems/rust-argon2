@@ -97,9 +97,9 @@
 //! - `verify_raw_std`
 
 
+extern crate base64;
 extern crate blake2_rfc;
 extern crate crossbeam;
-extern crate rustc_serialize;
 
 mod argon2;
 mod block;
