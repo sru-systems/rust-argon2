@@ -86,7 +86,7 @@ pub fn encoded_len(
 /// let encoded = argon2::hash_encoded(pwd, salt, &config).unwrap();
 /// ```
 pub fn hash_encoded(pwd: &[u8], salt: &[u8], config: &Config) -> Result<String> {
-    let context = try!(Context::new(config.clone(), pwd, salt));
+    let context = Context::new(config.clone(), pwd, salt)?;
     let hash = run(&context);
     let encoded = encoding::encode_string(&context, &hash);
     Ok(encoded)
@@ -296,7 +296,7 @@ pub fn hash_encoded_std(
 /// let vec = argon2::hash_raw(pwd, salt, &config).unwrap();
 /// ```
 pub fn hash_raw(pwd: &[u8], salt: &[u8], config: &Config) -> Result<Vec<u8>> {
-    let context = try!(Context::new(config.clone(), pwd, salt));
+    let context = Context::new(config.clone(), pwd, salt)?;
     let hash = run(&context);
     Ok(hash)
 }
@@ -489,7 +489,7 @@ pub fn hash_raw_std(
 /// assert!(res);
 /// ```
 pub fn verify_encoded(encoded: &str, pwd: &[u8]) -> Result<bool> {
-    let decoded = try!(encoding::decode_string(encoded));
+    let decoded = encoding::decode_string(encoded)?;
     let config = Config {
         variant: decoded.variant,
         version: decoded.version,
@@ -526,7 +526,7 @@ pub fn verify_raw(pwd: &[u8], salt: &[u8], hash: &[u8], config: &Config) -> Resu
         hash_length: hash.len() as u32,
         ..config.clone()
     };
-    let context = try!(Context::new(config, pwd, salt));
+    let context = Context::new(config, pwd, salt)?;
     Ok(run(&context) == hash)
 }
 
