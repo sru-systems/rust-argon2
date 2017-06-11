@@ -14,6 +14,9 @@ keywords = ["argon2", "argon2d", "argon2i", "hash", "password"]
 name = "argon2"
 
 [dependencies]
+base64 = "0.6.0"
 blake2-rfc = "0.2.17"
 crossbeam = "0.2.10"
-rustc-serialize = "0.3.22"
+
+[dev-dependencies]
+hex = "0.2.0"

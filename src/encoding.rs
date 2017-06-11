@@ -6,21 +6,14 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use rustc_serialize::base64::{CharacterSet, Config as Base64Config};
-use rustc_serialize::base64::{FromBase64, Newline, ToBase64};
+use base64;
+use base64::{CharacterSet, Config as Base64Config, LineWrap};
 use super::context::Context;
 use super::decoded::Decoded;
 use super::error::Error;
 use super::result::Result;
 use super::variant::Variant;
 use super::version::Version;
-
-static BASE64_CONFIG: Base64Config = Base64Config {
-    char_set: CharacterSet::Standard,
-    newline: Newline::CRLF,
-    pad: false,
-    line_length: None,
-};
 
 /// Structure containing the options.
 struct Options {
@@ -47,8 +40,8 @@ pub fn decode_string(encoded: &str) -> Result<Decoded> {
         let variant = decode_variant(items[1])?;
         let version = decode_version(items[2])?;
         let options = decode_options(items[3])?;
-        let salt = decode_base64(items[4])?;
-        let hash = decode_base64(items[5])?;
+        let salt = base64::decode(items[4])?;
+        let hash = base64::decode(items[5])?;
 
         Ok(Decoded {
             variant: variant,
@@ -63,8 +56,8 @@ pub fn decode_string(encoded: &str) -> Result<Decoded> {
         decode_empty(items[0])?;
         let variant = decode_variant(items[1])?;
         let options = decode_options(items[2])?;
-        let salt = decode_base64(items[3])?;
-        let hash = decode_base64(items[4])?;
+        let salt = base64::decode(items[3])?;
+        let hash = base64::decode(items[4])?;
 
         Ok(Decoded {
             variant: variant,
@@ -79,13 +72,6 @@ pub fn decode_string(encoded: &str) -> Result<Decoded> {
         return Err(Error::DecodingFail);
     }
 
-}
-
-fn decode_base64(str: &str) -> Result<Vec<u8>> {
-    match str.from_base64() {
-        Ok(bytes) => Ok(bytes),
-        Err(_) => Err(Error::DecodingFail),
-    }
 }
 
 fn decode_empty(str: &str) -> Result<()> {
@@ -148,6 +134,8 @@ fn decode_version(str: &str) -> Result<Version> {
 
 /// Encodes the hash and context.
 pub fn encode_string(context: &Context, hash: &Vec<u8>) -> String {
+    // Temporary: https://github.com/alicemaz/rust-base64/pull/38
+    let base64_config = Base64Config::new(CharacterSet::Standard, false, false, LineWrap::NoWrap);
     format!(
         "${}$v={}$m={},t={},p={}${}${}",
         context.config.variant,
@@ -155,8 +143,8 @@ pub fn encode_string(context: &Context, hash: &Vec<u8>) -> String {
         context.config.mem_cost,
         context.config.time_cost,
         context.config.lanes,
-        context.salt.to_base64(BASE64_CONFIG),
-        hash.to_base64(BASE64_CONFIG),
+        base64::encode_config(context.salt, base64_config),
+        base64::encode_config(hash, base64_config),
     )
 }
 
