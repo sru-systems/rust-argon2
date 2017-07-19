@@ -74,27 +74,6 @@
 //!
 //! This version uses the standard implementation and does not yet implement
 //! optimizations. Therefore, it is not the fastest implementation available.
-//!
-//!
-//! # History
-//!
-//! __Version 0.2.0__
-//!
-//! This version added a `Config` struct. Due to this struct the `hash_encoded`,
-//! `hash_raw` and `verify_raw` functions were changed in a non backward
-//! compatible way. However, the previous functionality is still available by
-//! using `hash_encoded_old`, `hash_raw_old` and `verify_raw_old`.
-//!
-//! The following functions are deprecated since this version:
-//!
-//! - `hash_encoded_defaults`
-//! - `hash_encoded_old`
-//! - `hash_encoded_std`
-//! - `hash_raw_defaults`
-//! - `hash_raw_old`
-//! - `hash_raw_std`
-//! - `verify_raw_old`
-//! - `verify_raw_std`
 
 
 extern crate base64;
