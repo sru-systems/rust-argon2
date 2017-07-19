@@ -99,22 +99,24 @@ fn fill_block(prev_block: &Block, ref_block: &Block, next_block: &mut Block, wit
         let mut v14 = block_r[16 * i + 14];
         let mut v15 = block_r[16 * i + 15];
 
-        p(&mut v0,
-          &mut v1,
-          &mut v2,
-          &mut v3,
-          &mut v4,
-          &mut v5,
-          &mut v6,
-          &mut v7,
-          &mut v8,
-          &mut v9,
-          &mut v10,
-          &mut v11,
-          &mut v12,
-          &mut v13,
-          &mut v14,
-          &mut v15);
+        p(
+            &mut v0,
+            &mut v1,
+            &mut v2,
+            &mut v3,
+            &mut v4,
+            &mut v5,
+            &mut v6,
+            &mut v7,
+            &mut v8,
+            &mut v9,
+            &mut v10,
+            &mut v11,
+            &mut v12,
+            &mut v13,
+            &mut v14,
+            &mut v15,
+        );
 
         block_r[16 * i] = v0;
         block_r[16 * i + 1] = v1;
@@ -154,22 +156,24 @@ fn fill_block(prev_block: &Block, ref_block: &Block, next_block: &mut Block, wit
         let mut v14 = block_r[2 * i + 112];
         let mut v15 = block_r[2 * i + 113];
 
-        p(&mut v0,
-          &mut v1,
-          &mut v2,
-          &mut v3,
-          &mut v4,
-          &mut v5,
-          &mut v6,
-          &mut v7,
-          &mut v8,
-          &mut v9,
-          &mut v10,
-          &mut v11,
-          &mut v12,
-          &mut v13,
-          &mut v14,
-          &mut v15);
+        p(
+            &mut v0,
+            &mut v1,
+            &mut v2,
+            &mut v3,
+            &mut v4,
+            &mut v5,
+            &mut v6,
+            &mut v7,
+            &mut v8,
+            &mut v9,
+            &mut v10,
+            &mut v11,
+            &mut v12,
+            &mut v13,
+            &mut v14,
+            &mut v15,
+        );
 
         block_r[2 * i] = v0;
         block_r[2 * i + 1] = v1;
@@ -242,9 +246,8 @@ fn fill_memory_blocks_st(context: &Context, memory: &mut Memory) {
 fn fill_segment(context: &Context, position: &Position, memory: &mut Memory) {
     let mut position = position.clone();
     let data_independent_addressing = (context.config.variant == Variant::Argon2i) ||
-                                      (context.config.variant == Variant::Argon2id &&
-                                       position.pass == 0) &&
-                                      (position.slice < (common::SYNC_POINTS / 2));
+        (context.config.variant == Variant::Argon2id && position.pass == 0) &&
+            (position.slice < (common::SYNC_POINTS / 2));
     let zero_block = Block::zero();
     let mut input_block = Block::zero();
     let mut address_block = Block::zero();
@@ -270,8 +273,7 @@ fn fill_segment(context: &Context, position: &Position, memory: &mut Memory) {
     }
 
     let mut curr_offset = (position.lane * context.lane_length) +
-                          (position.slice * context.segment_length) +
-                          starting_index;
+        (position.slice * context.segment_length) + starting_index;
 
     let mut prev_offset = if curr_offset % context.lane_length == 0 {
         // Last block in this lane
@@ -346,20 +348,22 @@ fn g(a: &mut u64, b: &mut u64, c: &mut u64, d: &mut u64) {
 }
 
 fn h0(context: &Context) -> [u8; common::PREHASH_SEED_LENGTH] {
-    let input = [&u32_as_32le(context.config.lanes),
-                 &u32_as_32le(context.config.hash_length),
-                 &u32_as_32le(context.config.mem_cost),
-                 &u32_as_32le(context.config.time_cost),
-                 &u32_as_32le(context.config.version.as_u32()),
-                 &u32_as_32le(context.config.variant.as_u32()),
-                 &len_as_32le(context.pwd),
-                 context.pwd.as_ref(),
-                 &len_as_32le(context.salt),
-                 context.salt.as_ref(),
-                 &len_as_32le(context.config.secret),
-                 context.config.secret.as_ref(),
-                 &len_as_32le(context.config.ad),
-                 context.config.ad.as_ref()];
+    let input = [
+        &u32_as_32le(context.config.lanes),
+        &u32_as_32le(context.config.hash_length),
+        &u32_as_32le(context.config.mem_cost),
+        &u32_as_32le(context.config.time_cost),
+        &u32_as_32le(context.config.version.as_u32()),
+        &u32_as_32le(context.config.variant.as_u32()),
+        &len_as_32le(context.pwd),
+        context.pwd.as_ref(),
+        &len_as_32le(context.salt),
+        context.salt.as_ref(),
+        &len_as_32le(context.config.secret),
+        context.config.secret.as_ref(),
+        &len_as_32le(context.config.ad),
+        context.config.ad.as_ref(),
+    ];
     let mut out = [0u8; common::PREHASH_SEED_LENGTH];
     blake2b(&mut out[0..common::PREHASH_DIGEST_LENGTH], &input);
     out
@@ -472,7 +476,7 @@ fn p(
     v12: &mut u64,
     v13: &mut u64,
     v14: &mut u64,
-    v15: &mut u64
+    v15: &mut u64,
 ) {
     g(v0, v4, v8, v12);
     g(v1, v5, v9, v13);

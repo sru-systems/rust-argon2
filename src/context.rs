@@ -36,11 +36,7 @@ pub struct Context<'a> {
 
 impl<'a> Context<'a> {
     /// Attempts to create a new context.
-    pub fn new(
-        config: Config<'a>,
-        pwd: &'a [u8],
-        salt: &'a [u8],
-    ) -> Result<Context<'a>> {
+    pub fn new(config: Config<'a>, pwd: &'a [u8], salt: &'a [u8]) -> Result<Context<'a>> {
         if config.lanes < common::MIN_LANES {
             return Err(Error::LanesTooFew);
         } else if config.lanes > common::MAX_LANES {
@@ -159,8 +155,7 @@ mod tests {
             mem_cost: 7,
             ..Default::default()
         };
-        assert_eq!(Context::new(config, &[0u8; 8], &[0u8; 8]),
-                   Err(Error::MemoryTooLittle));
+        assert_eq!(Context::new(config, &[0u8; 8], &[0u8; 8]), Err(Error::MemoryTooLittle));
     }
 
     #[test]
@@ -170,8 +165,7 @@ mod tests {
             mem_cost: 31,
             ..Default::default()
         };
-        assert_eq!(Context::new(config, &[0u8; 8], &[0u8; 8]),
-                   Err(Error::MemoryTooLittle));
+        assert_eq!(Context::new(config, &[0u8; 8], &[0u8; 8]), Err(Error::MemoryTooLittle));
     }
 
     #[test]
@@ -180,8 +174,7 @@ mod tests {
             time_cost: 0,
             ..Default::default()
         };
-        assert_eq!(Context::new(config, &[0u8; 8], &[0u8; 8]),
-                   Err(Error::TimeTooSmall));
+        assert_eq!(Context::new(config, &[0u8; 8], &[0u8; 8]), Err(Error::TimeTooSmall));
     }
 
     #[test]
@@ -190,8 +183,7 @@ mod tests {
             lanes: 0,
             ..Default::default()
         };
-        assert_eq!(Context::new(config, &[0u8; 8], &[0u8; 8]),
-                   Err(Error::LanesTooFew));
+        assert_eq!(Context::new(config, &[0u8; 8], &[0u8; 8]), Err(Error::LanesTooFew));
     }
 
     #[test]
@@ -200,16 +192,14 @@ mod tests {
             lanes: 1 << 24,
             ..Default::default()
         };
-        assert_eq!(Context::new(config, &[0u8; 8], &[0u8; 8]),
-                   Err(Error::LanesTooMany));
+        assert_eq!(Context::new(config, &[0u8; 8], &[0u8; 8]), Err(Error::LanesTooMany));
     }
 
     #[test]
     fn new_with_too_short_salt_returns_correct_error() {
         let config = Default::default();
         let salt = [0u8; 7];
-        assert_eq!(Context::new(config, &[0u8; 8], &salt),
-                   Err(Error::SaltTooShort));
+        assert_eq!(Context::new(config, &[0u8; 8], &salt), Err(Error::SaltTooShort));
     }
 
     #[test]
@@ -218,7 +208,6 @@ mod tests {
             hash_length: 3,
             ..Default::default()
         };
-        assert_eq!(Context::new(config, &[0u8; 8], &[0u8; 8]),
-                   Err(Error::OutputTooShort));
+        assert_eq!(Context::new(config, &[0u8; 8], &[0u8; 8]), Err(Error::OutputTooShort));
     }
 }

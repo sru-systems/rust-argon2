@@ -174,8 +174,18 @@ mod tests {
 
     #[test]
     fn base64_len_returns_correct_length() {
-        let tests = vec![(1, 2), (2, 3), (3, 4), (4, 6), (5, 7), (6, 8), (7, 10), (8, 11),
-                         (9, 12), (10, 14)];
+        let tests = vec![
+            (1, 2),
+            (2, 3),
+            (3, 4),
+            (4, 6),
+            (5, 7),
+            (6, 8),
+            (7, 10),
+            (8, 11),
+            (9, 12),
+            (10, 14),
+        ];
         for (len, expected) in tests {
             let actual = base64_len(len);
             assert_eq!(actual, expected);
@@ -378,7 +388,14 @@ mod tests {
 
     #[test]
     fn num_len_returns_correct_length() {
-        let tests = vec![(1, 1), (10, 2), (110, 3), (1230, 4), (12340, 5), (123457, 6)];
+        let tests = vec![
+            (1, 1),
+            (10, 2),
+            (110, 3),
+            (1230, 4),
+            (12340, 5),
+            (123457, 6),
+        ];
         for (num, expected) in tests {
             let actual = num_len(num);
             assert_eq!(actual, expected);

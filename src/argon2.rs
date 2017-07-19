@@ -114,7 +114,7 @@ pub fn hash_encoded(pwd: &[u8], salt: &[u8], config: &Config) -> Result<String> 
 /// let config = Config::default();
 /// let encoded = argon2::hash_encoded(pwd, salt, &config).unwrap();
 /// ```
-#[deprecated(since="0.2.0", note="please use `hash_encoded` instead")]
+#[deprecated(since = "0.2.0", note = "please use `hash_encoded` instead")]
 pub fn hash_encoded_defaults(pwd: &[u8], salt: &[u8]) -> Result<String> {
     hash_encoded(pwd, salt, &Config::default())
 }
@@ -169,7 +169,7 @@ pub fn hash_encoded_defaults(pwd: &[u8], salt: &[u8]) -> Result<String> {
 /// };
 /// let encoded = argon2::hash_encoded(pwd, salt, &config).unwrap();
 /// ```
-#[deprecated(since="0.2.0", note="please use new `hash_encoded` instead")]
+#[deprecated(since = "0.2.0", note = "please use new `hash_encoded` instead")]
 pub fn hash_encoded_old(
     variant: Variant,
     version: Version,
@@ -181,7 +181,7 @@ pub fn hash_encoded_old(
     salt: &[u8],
     secret: &[u8],
     ad: &[u8],
-    hash_len: u32
+    hash_len: u32,
 ) -> Result<String> {
     let config = Config {
         variant: variant,
@@ -241,7 +241,7 @@ pub fn hash_encoded_old(
 /// };
 /// let encoded = argon2::hash_encoded(pwd, salt, &config).unwrap();
 /// ```
-#[deprecated(since="0.2.0", note="please use `hash_encoded` instead")]
+#[deprecated(since = "0.2.0", note = "please use `hash_encoded` instead")]
 pub fn hash_encoded_std(
     variant: Variant,
     version: Version,
@@ -250,7 +250,7 @@ pub fn hash_encoded_std(
     parallelism: u32,
     pwd: &[u8],
     salt: &[u8],
-    hash_len: u32
+    hash_len: u32,
 ) -> Result<String> {
     let config = Config {
         variant: variant,
@@ -323,7 +323,7 @@ pub fn hash_raw(pwd: &[u8], salt: &[u8], config: &Config) -> Result<Vec<u8>> {
 /// let config = Config::default();
 /// let vec = argon2::hash_raw(pwd, salt, &config).unwrap();
 /// ```
-#[deprecated(since="0.2.0", note="please use `hash_raw` instead")]
+#[deprecated(since = "0.2.0", note = "please use `hash_raw` instead")]
 pub fn hash_raw_defaults(pwd: &[u8], salt: &[u8]) -> Result<Vec<u8>> {
     hash_raw(pwd, salt, &Config::default())
 }
@@ -378,7 +378,7 @@ pub fn hash_raw_defaults(pwd: &[u8], salt: &[u8]) -> Result<Vec<u8>> {
 /// };
 /// let vec = argon2::hash_raw(pwd, salt, &config);
 /// ```
-#[deprecated(since="0.2.0", note="please use new `hash_raw` instead")]
+#[deprecated(since = "0.2.0", note = "please use new `hash_raw` instead")]
 pub fn hash_raw_old(
     variant: Variant,
     version: Version,
@@ -390,7 +390,7 @@ pub fn hash_raw_old(
     salt: &[u8],
     secret: &[u8],
     ad: &[u8],
-    hash_len: u32
+    hash_len: u32,
 ) -> Result<Vec<u8>> {
     let config = Config {
         variant: variant,
@@ -450,7 +450,7 @@ pub fn hash_raw_old(
 /// };
 /// let vec = argon2::hash_raw(pwd, salt, &config);
 /// ```
-#[deprecated(since="0.2.0", note="please use `hash_raw` instead")]
+#[deprecated(since = "0.2.0", note = "please use `hash_raw` instead")]
 pub fn hash_raw_std(
     variant: Variant,
     version: Version,
@@ -459,7 +459,7 @@ pub fn hash_raw_std(
     parallelism: u32,
     pwd: &[u8],
     salt: &[u8],
-    hash_len: u32
+    hash_len: u32,
 ) -> Result<Vec<u8>> {
     let config = Config {
         variant: variant,
@@ -586,7 +586,7 @@ pub fn verify_raw(pwd: &[u8], salt: &[u8], hash: &[u8], config: &Config) -> Resu
 /// let res = argon2::verify_raw(pwd, salt, hash, &config).unwrap();
 /// assert!(res);
 /// ```
-#[deprecated(since="0.2.0", note="please use new `verify_raw` instead")]
+#[deprecated(since = "0.2.0", note = "please use new `verify_raw` instead")]
 pub fn verify_raw_old(
     variant: Variant,
     version: Version,
@@ -598,7 +598,7 @@ pub fn verify_raw_old(
     salt: &[u8],
     secret: &[u8],
     ad: &[u8],
-    hash: &[u8]
+    hash: &[u8],
 ) -> Result<bool> {
     let config = Config {
         variant: variant,
@@ -665,7 +665,7 @@ pub fn verify_raw_old(
 /// let res = argon2::verify_raw(pwd, salt, hash, &config).unwrap();
 /// assert!(res);
 /// ```
-#[deprecated(since="0.2.0", note="please use `verify_raw` instead")]
+#[deprecated(since = "0.2.0", note = "please use `verify_raw` instead")]
 pub fn verify_raw_std(
     variant: Variant,
     version: Version,
@@ -674,7 +674,7 @@ pub fn verify_raw_std(
     parallelism: u32,
     pwd: &[u8],
     salt: &[u8],
-    hash: &[u8]
+    hash: &[u8],
 ) -> Result<bool> {
     let config = Config {
         variant: variant,
