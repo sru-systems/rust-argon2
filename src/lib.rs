@@ -17,7 +17,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! rust-argon2 = "0.2.0"
+//! rust-argon2 = "0.3.0"
 //! ```
 //!
 //! And the following to your crate root:
