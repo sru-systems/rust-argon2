@@ -1012,8 +1012,8 @@ fn test_hash_raw_with_not_enough_memory() {
         time_cost: 2,
         lanes: 1,
         thread_mode: ThreadMode::Sequential,
-        secret: &[],
-        ad: &[],
+        secret: vec![],
+        ad: vec![],
         hash_length: 32,
     };
     let res = argon2::hash_raw(pwd, salt, &config);
@@ -1031,8 +1031,8 @@ fn test_hash_raw_with_too_short_salt() {
         time_cost: 2,
         lanes: 1,
         thread_mode: ThreadMode::Sequential,
-        secret: &[],
-        ad: &[],
+        secret: vec![],
+        ad: vec![],
         hash_length: 32,
     };
     let res = argon2::hash_raw(pwd, salt, &config);
@@ -1057,8 +1057,8 @@ fn hash_test(
         time_cost: t,
         lanes: p,
         thread_mode: ThreadMode::from_threads(p),
-        secret: &[],
-        ad: &[],
+        secret: vec![],
+        ad: vec![],
         hash_length: 32,
     };
     let hash = argon2::hash_raw(pwd, salt, &config).unwrap();

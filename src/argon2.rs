@@ -163,8 +163,8 @@ pub fn hash_encoded_defaults(pwd: &[u8], salt: &[u8]) -> Result<String> {
 ///     time_cost: 10,
 ///     lanes: 1,
 ///     thread_mode: ThreadMode::Sequential,
-///     secret: b"secret value",
-///     ad: b"associated data",
+///     secret: b"secret value".to_vec(),
+///     ad: b"associated data".to_vec(),
 ///     hash_length: 32,
 /// };
 /// let encoded = argon2::hash_encoded(pwd, salt, &config).unwrap();
@@ -190,8 +190,8 @@ pub fn hash_encoded_old(
         time_cost: time_cost,
         lanes: lanes,
         thread_mode: ThreadMode::from_threads(threads),
-        secret: secret,
-        ad: ad,
+        secret: secret.to_vec(),
+        ad: ad.to_vec(),
         hash_length: hash_len,
     };
     hash_encoded(pwd, salt, &config)
@@ -235,8 +235,8 @@ pub fn hash_encoded_old(
 ///     time_cost: 10,
 ///     lanes: 1,
 ///     thread_mode: ThreadMode::Sequential,
-///     secret: &[],
-///     ad: &[],
+///     secret: vec![],
+///     ad: vec![],
 ///     hash_length: 32,
 /// };
 /// let encoded = argon2::hash_encoded(pwd, salt, &config).unwrap();
@@ -259,8 +259,8 @@ pub fn hash_encoded_std(
         time_cost: time_cost,
         lanes: parallelism,
         thread_mode: ThreadMode::from_threads(parallelism),
-        secret: &[],
-        ad: &[],
+        secret: vec![],
+        ad: vec![],
         hash_length: hash_len,
     };
     hash_encoded(pwd, salt, &config)
@@ -372,8 +372,8 @@ pub fn hash_raw_defaults(pwd: &[u8], salt: &[u8]) -> Result<Vec<u8>> {
 ///     time_cost: 10,
 ///     lanes: 1,
 ///     thread_mode: ThreadMode::Sequential,
-///     secret: b"secret value",
-///     ad: b"associated data",
+///     secret: b"secret value".to_vec(),
+///     ad: b"associated data".to_vec(),
 ///     hash_length: 32,
 /// };
 /// let vec = argon2::hash_raw(pwd, salt, &config);
@@ -399,8 +399,8 @@ pub fn hash_raw_old(
         time_cost: time_cost,
         lanes: lanes,
         thread_mode: ThreadMode::from_threads(threads),
-        secret: secret,
-        ad: ad,
+        secret: secret.to_vec(),
+        ad: ad.to_vec(),
         hash_length: hash_len,
     };
     hash_raw(pwd, salt, &config)
@@ -444,8 +444,8 @@ pub fn hash_raw_old(
 ///     time_cost: 10,
 ///     lanes: 1,
 ///     thread_mode: ThreadMode::Sequential,
-///     secret: &[],
-///     ad: &[],
+///     secret: vec![],
+///     ad: vec![],
 ///     hash_length: 32,
 /// };
 /// let vec = argon2::hash_raw(pwd, salt, &config);
@@ -468,8 +468,8 @@ pub fn hash_raw_std(
         time_cost: time_cost,
         lanes: parallelism,
         thread_mode: ThreadMode::from_threads(parallelism),
-        secret: &[],
-        ad: &[],
+        secret: vec![],
+        ad: vec![],
         hash_length: hash_len,
     };
     hash_raw(pwd, salt, &config)
@@ -497,8 +497,8 @@ pub fn verify_encoded(encoded: &str, pwd: &[u8]) -> Result<bool> {
         time_cost: decoded.time_cost,
         lanes: decoded.parallelism,
         thread_mode: ThreadMode::from_threads(decoded.parallelism),
-        secret: &[],
-        ad: &[],
+        secret: vec![],
+        ad: vec![],
         hash_length: decoded.hash.len() as u32,
     };
     verify_raw(pwd, &decoded.salt, &decoded.hash, &config)
@@ -579,8 +579,8 @@ pub fn verify_raw(pwd: &[u8], salt: &[u8], hash: &[u8], config: &Config) -> Resu
 ///     time_cost: 3,
 ///     lanes: 1,
 ///     thread_mode: ThreadMode::Sequential,
-///     secret: &[],
-///     ad: &[],
+///     secret: vec![],
+///     ad: vec![],
 ///     hash_length: hash.len() as u32,
 /// };
 /// let res = argon2::verify_raw(pwd, salt, hash, &config).unwrap();
@@ -607,8 +607,8 @@ pub fn verify_raw_old(
         time_cost: time_cost,
         lanes: lanes,
         thread_mode: ThreadMode::from_threads(threads),
-        secret: secret,
-        ad: ad,
+        secret: secret.to_vec(),
+        ad: ad.to_vec(),
         hash_length: hash.len() as u32,
     };
     verify_raw(pwd, salt, hash, &config)
@@ -658,8 +658,8 @@ pub fn verify_raw_old(
 ///     time_cost: 3,
 ///     lanes: 1,
 ///     thread_mode: ThreadMode::Sequential,
-///     secret: &[],
-///     ad: &[],
+///     secret: vec![],
+///     ad: vec![],
 ///     hash_length: hash.len() as u32,
 /// };
 /// let res = argon2::verify_raw(pwd, salt, hash, &config).unwrap();
@@ -683,8 +683,8 @@ pub fn verify_raw_std(
         time_cost: time_cost,
         lanes: parallelism,
         thread_mode: ThreadMode::from_threads(parallelism),
-        secret: &[],
-        ad: &[],
+        secret: vec![],
+        ad: vec![],
         hash_length: hash.len() as u32,
     };
     verify_raw(pwd, salt, hash, &config)

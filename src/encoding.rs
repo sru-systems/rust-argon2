@@ -367,11 +367,11 @@ mod tests {
     fn encode_string_returns_correct_string() {
         let hash = b"12345678901234567890123456789012".to_vec();
         let config = Config {
-            ad: &[],
+            ad: vec![],
             hash_length: hash.len() as u32,
             lanes: 1,
             mem_cost: 4096,
-            secret: &[],
+            secret: vec![],
             thread_mode: ThreadMode::Parallel,
             time_cost: 3,
             variant: Variant::Argon2i,

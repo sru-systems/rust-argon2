@@ -359,9 +359,9 @@ fn h0(context: &Context) -> [u8; common::PREHASH_SEED_LENGTH] {
         context.pwd.as_ref(),
         &len_as_32le(context.salt),
         context.salt.as_ref(),
-        &len_as_32le(context.config.secret),
+        &len_as_32le(&context.config.secret),
         context.config.secret.as_ref(),
-        &len_as_32le(context.config.ad),
+        &len_as_32le(&context.config.ad),
         context.config.ad.as_ref(),
     ];
     let mut out = [0u8; common::PREHASH_SEED_LENGTH];
