@@ -55,8 +55,8 @@
 //!     time_cost: 10,
 //!     lanes: 4,
 //!     thread_mode: ThreadMode::Parallel,
-//!     secret: &[],
-//!     ad: &[],
+//!     secret: vec![],
+//!     ad: vec![],
 //!     hash_length: 32
 //! };
 //! let hash = argon2::hash_encoded(password, salt, &config).unwrap();

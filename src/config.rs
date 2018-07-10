@@ -30,9 +30,9 @@ use super::version::Version;
 /// assert_eq!(config.version, Version::Version13);
 /// ```
 #[derive(Clone, Debug, PartialEq)]
-pub struct Config<'a> {
+pub struct Config {
     /// The associated data.
-    pub ad: &'a [u8],
+    pub ad: Vec<u8>,
 
     /// The length of the resulting hash.
     pub hash_length: u32,
@@ -44,7 +44,7 @@ pub struct Config<'a> {
     pub mem_cost: u32,
 
     /// The key.
-    pub secret: &'a [u8],
+    pub secret: Vec<u8>,
 
     /// The thread mode.
     pub thread_mode: ThreadMode,
@@ -59,20 +59,20 @@ pub struct Config<'a> {
     pub version: Version,
 }
 
-impl<'a> Config<'a> {
+impl Config {
     pub fn uses_sequential(&self) -> bool {
         self.thread_mode == ThreadMode::Sequential || self.lanes == 1
     }
 }
 
-impl<'a> Default for Config<'a> {
-    fn default() -> Config<'a> {
+impl Default for Config {
+    fn default() -> Config {
         Config {
-            ad: &[],
+            ad: vec![],
             hash_length: common::DEF_HASH_LENGTH,
             lanes: common::DEF_LANES,
             mem_cost: common::DEF_MEMORY,
-            secret: &[],
+            secret: vec![],
             thread_mode: ThreadMode::default(),
             time_cost: common::DEF_TIME,
             variant: Variant::default(),

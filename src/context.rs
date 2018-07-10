@@ -16,7 +16,7 @@ use super::result::Result;
 #[derive(Debug, PartialEq)]
 pub struct Context<'a> {
     /// The config for this context.
-    pub config: Config<'a>,
+    pub config: Config,
 
     /// The length of a lane.
     pub lane_length: u32,
@@ -36,7 +36,7 @@ pub struct Context<'a> {
 
 impl<'a> Context<'a> {
     /// Attempts to create a new context.
-    pub fn new(config: Config<'a>, pwd: &'a [u8], salt: &'a [u8]) -> Result<Context<'a>> {
+    pub fn new(config: Config, pwd: &'a [u8], salt: &'a [u8]) -> Result<Context<'a>> {
         if config.lanes < common::MIN_LANES {
             return Err(Error::LanesTooFew);
         } else if config.lanes > common::MAX_LANES {
@@ -125,11 +125,11 @@ mod tests {
     #[test]
     fn new_returns_correct_instance() {
         let config = Config {
-            ad: b"additionaldata",
+            ad: b"additionaldata".to_vec(),
             hash_length: 32,
             lanes: 4,
             mem_cost: 4096,
-            secret: b"secret",
+            secret: b"secret".to_vec(),
             thread_mode: ThreadMode::Sequential,
             time_cost: 3,
             variant: Variant::Argon2i,
