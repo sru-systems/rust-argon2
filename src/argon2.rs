@@ -489,6 +489,25 @@ pub fn hash_raw_std(
 /// assert!(res);
 /// ```
 pub fn verify_encoded(encoded: &str, pwd: &[u8]) -> Result<bool> {
+    verify_encoded_ext(encoded, pwd, &[], &[])
+}
+
+/// Verifies the password with the encoded hash, secret and associated data.
+///
+/// # Examples
+///
+/// ```
+/// use argon2;
+///
+/// let enc = "$argon2i$v=19$m=4096,t=3,p=1$c29tZXNhbHQ\
+///            $OlcSvlN20Lz43sK3jhCJ9K04oejhiY0AmI+ck6nuETo";
+/// let pwd = b"password";
+/// let secret = b"secret";
+/// let ad = b"ad";
+/// let res = argon2::verify_encoded_ext(enc, pwd, secret, ad).unwrap();
+/// assert!(res);
+/// ```
+pub fn verify_encoded_ext(encoded: &str, pwd: &[u8], secret: &[u8], ad: &[u8]) -> Result<bool> {
     let decoded = encoding::decode_string(encoded)?;
     let config = Config {
         variant: decoded.variant,
@@ -497,8 +516,8 @@ pub fn verify_encoded(encoded: &str, pwd: &[u8]) -> Result<bool> {
         time_cost: decoded.time_cost,
         lanes: decoded.parallelism,
         thread_mode: ThreadMode::from_threads(decoded.parallelism),
-        secret: &[],
-        ad: &[],
+        secret: secret,
+        ad: ad,
         hash_length: decoded.hash.len() as u32,
     };
     verify_raw(pwd, &decoded.salt, &decoded.hash, &config)
