@@ -16,7 +16,7 @@ name = "argon2"
 [dependencies]
 base64 = "0.10"
 blake2-rfc = "0.2"
-crossbeam = "0.2.10"
+crossbeam = "0.5"
 
 [dev-dependencies]
 hex = "0.3"

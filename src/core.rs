@@ -214,14 +214,14 @@ fn fill_first_blocks(context: &Context, memory: &mut Memory, h0: &mut [u8]) {
 fn fill_memory_blocks_mt(context: &Context, memory: &mut Memory) {
     for p in 0..context.config.time_cost {
         for s in 0..common::SYNC_POINTS {
-            scope(|scoped| for (l, mem) in (0..context.config.lanes).zip(memory.as_lanes_mut()) {
+            let _ = scope(|scoped| for (l, mem) in (0..context.config.lanes).zip(memory.as_lanes_mut()) {
                 let position = Position {
                     pass: p,
                     lane: l,
                     slice: s,
                     index: 0,
                 };
-                scoped.spawn(move || { fill_segment(context, &position, mem); });
+                scoped.spawn(move |_| { fill_segment(context, &position, mem); });
             });
         }
     }
