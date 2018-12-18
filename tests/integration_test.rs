@@ -1062,7 +1062,10 @@ fn hash_test(
         hash_length: 32,
     };
     let hash = argon2::hash_raw(pwd, salt, &config).unwrap();
-    assert_eq!(hash.to_hex(), hex);
+    let mut hex_str = String::new();
+    let res = hash.write_hex(&mut hex_str);
+    assert_eq!(res, Ok(()));
+    assert_eq!(hex_str.as_str(), hex);
 
     let encoded = argon2::hash_encoded(pwd, salt, &config).unwrap();
     let result = argon2::verify_encoded(encoded.as_str(), pwd).unwrap();
