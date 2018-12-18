@@ -8,6 +8,10 @@ This documents all notable changes to
 ## 0.4.0
 
 - Replace rustc-serialize dependency with base64 and hex.
+- Update base64 dependency.
+- Update crossbeam dependency.
+- Update hex dependency.
+- Allow updating to minor versions of blake2-rfc.
 
 
 ## 0.3.0
