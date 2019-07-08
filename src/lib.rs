@@ -75,9 +75,8 @@
 //! This version uses the standard implementation and does not yet implement
 //! optimizations. Therefore, it is not the fastest implementation available.
 
-
 extern crate base64;
-extern crate blake2_rfc;
+extern crate blake2b_simd;
 extern crate crossbeam;
 
 mod argon2;

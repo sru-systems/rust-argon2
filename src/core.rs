@@ -6,15 +6,15 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use blake2_rfc::blake2b::Blake2b;
-use crossbeam::scope;
-use std::mem;
 use super::block::Block;
 use super::common;
 use super::context::Context;
 use super::memory::Memory;
 use super::variant::Variant;
 use super::version::Version;
+use blake2b_simd::Params;
+use crossbeam::scope;
+use std::mem;
 
 /// Position of the block currently being operated on.
 #[derive(Clone, Debug)]
@@ -53,11 +53,11 @@ pub fn finalize(context: &Context, memory: &Memory) -> Vec<u8> {
 }
 
 fn blake2b(out: &mut [u8], input: &[&[u8]]) {
-    let mut blake = Blake2b::new(out.len());
+    let mut blake = Params::new().hash_length(out.len()).to_state();
     for slice in input {
         blake.update(slice);
     }
-    out.clone_from_slice(blake.finalize().as_bytes());
+    out.copy_from_slice(blake.finalize().as_bytes());
 }
 
 fn f_bla_mka(x: u64, y: u64) -> u64 {
@@ -100,22 +100,8 @@ fn fill_block(prev_block: &Block, ref_block: &Block, next_block: &mut Block, wit
         let mut v15 = block_r[16 * i + 15];
 
         p(
-            &mut v0,
-            &mut v1,
-            &mut v2,
-            &mut v3,
-            &mut v4,
-            &mut v5,
-            &mut v6,
-            &mut v7,
-            &mut v8,
-            &mut v9,
-            &mut v10,
-            &mut v11,
-            &mut v12,
-            &mut v13,
-            &mut v14,
-            &mut v15,
+            &mut v0, &mut v1, &mut v2, &mut v3, &mut v4, &mut v5, &mut v6, &mut v7, &mut v8,
+            &mut v9, &mut v10, &mut v11, &mut v12, &mut v13, &mut v14, &mut v15,
         );
 
         block_r[16 * i] = v0;
@@ -157,22 +143,8 @@ fn fill_block(prev_block: &Block, ref_block: &Block, next_block: &mut Block, wit
         let mut v15 = block_r[2 * i + 113];
 
         p(
-            &mut v0,
-            &mut v1,
-            &mut v2,
-            &mut v3,
-            &mut v4,
-            &mut v5,
-            &mut v6,
-            &mut v7,
-            &mut v8,
-            &mut v9,
-            &mut v10,
-            &mut v11,
-            &mut v12,
-            &mut v13,
-            &mut v14,
-            &mut v15,
+            &mut v0, &mut v1, &mut v2, &mut v3, &mut v4, &mut v5, &mut v6, &mut v7, &mut v8,
+            &mut v9, &mut v10, &mut v11, &mut v12, &mut v13, &mut v14, &mut v15,
         );
 
         block_r[2 * i] = v0;
@@ -214,14 +186,18 @@ fn fill_first_blocks(context: &Context, memory: &mut Memory, h0: &mut [u8]) {
 fn fill_memory_blocks_mt(context: &Context, memory: &mut Memory) {
     for p in 0..context.config.time_cost {
         for s in 0..common::SYNC_POINTS {
-            let _ = scope(|scoped| for (l, mem) in (0..context.config.lanes).zip(memory.as_lanes_mut()) {
-                let position = Position {
-                    pass: p,
-                    lane: l,
-                    slice: s,
-                    index: 0,
-                };
-                scoped.spawn(move |_| { fill_segment(context, &position, mem); });
+            let _ = scope(|scoped| {
+                for (l, mem) in (0..context.config.lanes).zip(memory.as_lanes_mut()) {
+                    let position = Position {
+                        pass: p,
+                        lane: l,
+                        slice: s,
+                        index: 0,
+                    };
+                    scoped.spawn(move |_| {
+                        fill_segment(context, &position, mem);
+                    });
+                }
             });
         }
     }
@@ -245,9 +221,9 @@ fn fill_memory_blocks_st(context: &Context, memory: &mut Memory) {
 
 fn fill_segment(context: &Context, position: &Position, memory: &mut Memory) {
     let mut position = position.clone();
-    let data_independent_addressing = (context.config.variant == Variant::Argon2i) ||
-        (context.config.variant == Variant::Argon2id && position.pass == 0) &&
-            (position.slice < (common::SYNC_POINTS / 2));
+    let data_independent_addressing = (context.config.variant == Variant::Argon2i)
+        || (context.config.variant == Variant::Argon2id && position.pass == 0)
+            && (position.slice < (common::SYNC_POINTS / 2));
     let zero_block = Block::zero();
     let mut input_block = Block::zero();
     let mut address_block = Block::zero();
@@ -272,8 +248,9 @@ fn fill_segment(context: &Context, position: &Position, memory: &mut Memory) {
         }
     }
 
-    let mut curr_offset = (position.lane * context.lane_length) +
-        (position.slice * context.segment_length) + starting_index;
+    let mut curr_offset = (position.lane * context.lane_length)
+        + (position.slice * context.segment_length)
+        + starting_index;
 
     let mut prev_offset = if curr_offset % context.lane_length == 0 {
         // Last block in this lane
@@ -301,7 +278,7 @@ fn fill_segment(context: &Context, position: &Position, memory: &mut Memory) {
         }
 
         // 1.2.2 Computing the lane of the reference block
-        let mut ref_lane = ((pseudo_rand >> 32)) % context.config.lanes as u64;
+        let mut ref_lane = (pseudo_rand >> 32) % context.config.lanes as u64;
         if (position.pass == 0) && (position.slice == 0) {
             // Can not reference other lanes yet
             ref_lane = position.lane as u64;
