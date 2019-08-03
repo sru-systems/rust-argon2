@@ -5,6 +5,11 @@ This documents all notable changes to
 [rust-argon2](https://github.com/sru-systems/rust-argon2).
 
 
+## 0.5.0
+
+- Replace blake2-rfc with blake2b_simd.
+
+
 ## 0.4.0
 
 - Replace rustc-serialize dependency with base64 and hex.
