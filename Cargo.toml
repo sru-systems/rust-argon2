@@ -1,6 +1,6 @@
 [package]
 name = "rust-argon2"
-version = "0.5.0"
+version = "0.5.1"
 authors = ["Martijn Rijkeboer <mrr@sru-systems.com>"]
 license = "MIT/Apache-2.0"
 description = "Rust implementation of the Argon2 password hashing function."
@@ -16,7 +16,7 @@ name = "argon2"
 [dependencies]
 base64 = "0.10"
 blake2b_simd = "0.5"
-crossbeam = "0.5"
+crossbeam-utils = "0.6"
 
 [dev-dependencies]
 hex = "0.3"

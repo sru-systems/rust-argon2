@@ -4,6 +4,10 @@ ChangeLog for rust-argon2
 This documents all notable changes to
 [rust-argon2](https://github.com/sru-systems/rust-argon2).
 
+## 0.5.1
+
+- Use crossbeam utils 0.6 instead of crossbeam 0.5
+
 
 ## 0.5.0
 

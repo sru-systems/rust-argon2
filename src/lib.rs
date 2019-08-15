@@ -77,7 +77,7 @@
 
 extern crate base64;
 extern crate blake2b_simd;
-extern crate crossbeam;
+extern crate crossbeam_utils;
 
 mod argon2;
 mod block;
