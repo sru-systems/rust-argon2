@@ -13,7 +13,7 @@ use super::memory::Memory;
 use super::variant::Variant;
 use super::version::Version;
 use blake2b_simd::Params;
-use crossbeam::scope;
+use crossbeam_utils::thread::scope;
 use std::mem;
 
 /// Position of the block currently being operated on.
