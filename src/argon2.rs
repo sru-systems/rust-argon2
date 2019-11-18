@@ -6,15 +6,15 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use super::context::Context;
-use super::config::Config;
-use super::core;
-use super::encoding;
-use super::memory::Memory;
-use super::result::Result;
-use super::thread_mode::ThreadMode;
-use super::variant::Variant;
-use super::version::Version;
+use crate::context::Context;
+use crate::config::Config;
+use crate::core;
+use crate::encoding;
+use crate::memory::Memory;
+use crate::result::Result;
+use crate::thread_mode::ThreadMode;
+use crate::variant::Variant;
+use crate::version::Version;
 
 /// Returns the length of the encoded string.
 ///

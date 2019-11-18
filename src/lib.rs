@@ -75,10 +75,6 @@
 //! This version uses the standard implementation and does not yet implement
 //! optimizations. Therefore, it is not the fastest implementation available.
 
-extern crate base64;
-extern crate blake2b_simd;
-extern crate crossbeam_utils;
-
 mod argon2;
 mod block;
 mod common;
@@ -94,10 +90,10 @@ mod thread_mode;
 mod variant;
 mod version;
 
-pub use argon2::*;
-pub use config::Config;
-pub use error::Error;
-pub use result::Result;
-pub use thread_mode::ThreadMode;
-pub use variant::Variant;
-pub use version::Version;
+pub use crate::argon2::*;
+pub use crate::config::Config;
+pub use crate::error::Error;
+pub use crate::result::Result;
+pub use crate::thread_mode::ThreadMode;
+pub use crate::variant::Variant;
+pub use crate::version::Version;

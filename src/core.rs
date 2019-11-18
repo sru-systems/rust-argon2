@@ -6,12 +6,12 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use super::block::Block;
-use super::common;
-use super::context::Context;
-use super::memory::Memory;
-use super::variant::Variant;
-use super::version::Version;
+use crate::block::Block;
+use crate::common;
+use crate::context::Context;
+use crate::memory::Memory;
+use crate::variant::Variant;
+use crate::version::Version;
 use blake2b_simd::Params;
 use crossbeam_utils::thread::scope;
 use std::mem;

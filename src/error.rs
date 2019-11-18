@@ -6,7 +6,6 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use base64;
 use std::{error, fmt};
 
 /// Error type for Argon2 errors.

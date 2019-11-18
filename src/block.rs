@@ -9,7 +9,7 @@
 use std::{fmt, mem};
 use std::fmt::Debug;
 use std::ops::{BitXorAssign, Index, IndexMut};
-use super::common;
+use crate::common;
 
 /// Structure for the (1KB) memory block implemented as 128 64-bit words.
 pub struct Block([u64; common::QWORDS_IN_BLOCK]);
@@ -91,8 +91,8 @@ impl PartialEq for Block {
 #[cfg(test)]
 mod tests {
 
-    use common;
-    use super::*;
+    use crate::block::Block;
+    use crate::common;
 
     #[test]
     fn as_u8_returns_correct_slice() {
