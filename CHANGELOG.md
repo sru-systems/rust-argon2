@@ -4,6 +4,15 @@ ChangeLog for rust-argon2
 This documents all notable changes to
 [rust-argon2](https://github.com/sru-systems/rust-argon2).
 
+## 0.6.0
+
+- Use 2018 edition or Rust
+- Use &dyn error::Error instead of &error::Error
+- Fix clippy lints
+- Allow callers of encode_string to pass any &[u8]
+- Update base64 dependency.
+
+
 ## 0.5.1
 
 - Use crossbeam utils 0.6 instead of crossbeam 0.5
