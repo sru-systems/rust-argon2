@@ -102,12 +102,12 @@ impl<'a> Context<'a> {
         let lane_length = segment_length * common::SYNC_POINTS;
 
         Ok(Context {
-            config: config,
-            lane_length: lane_length,
-            memory_blocks: memory_blocks,
-            pwd: pwd,
-            salt: salt,
-            segment_length: segment_length,
+            config,
+            lane_length,
+            memory_blocks,
+            pwd,
+            salt,
+            segment_length,
         })
     }
 }

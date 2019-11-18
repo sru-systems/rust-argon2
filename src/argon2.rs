@@ -184,14 +184,14 @@ pub fn hash_encoded_old(
     hash_len: u32,
 ) -> Result<String> {
     let config = Config {
-        variant: variant,
-        version: version,
-        mem_cost: mem_cost,
-        time_cost: time_cost,
-        lanes: lanes,
+        variant,
+        version,
+        mem_cost,
+        time_cost,
+        lanes,
         thread_mode: ThreadMode::from_threads(threads),
-        secret: secret,
-        ad: ad,
+        secret,
+        ad,
         hash_length: hash_len,
     };
     hash_encoded(pwd, salt, &config)
@@ -253,10 +253,10 @@ pub fn hash_encoded_std(
     hash_len: u32,
 ) -> Result<String> {
     let config = Config {
-        variant: variant,
-        version: version,
-        mem_cost: mem_cost,
-        time_cost: time_cost,
+        variant,
+        version,
+        mem_cost,
+        time_cost,
         lanes: parallelism,
         thread_mode: ThreadMode::from_threads(parallelism),
         secret: &[],
@@ -393,14 +393,14 @@ pub fn hash_raw_old(
     hash_len: u32,
 ) -> Result<Vec<u8>> {
     let config = Config {
-        variant: variant,
-        version: version,
-        mem_cost: mem_cost,
-        time_cost: time_cost,
-        lanes: lanes,
+        variant,
+        version,
+        mem_cost,
+        time_cost,
+        lanes,
         thread_mode: ThreadMode::from_threads(threads),
-        secret: secret,
-        ad: ad,
+        secret,
+        ad,
         hash_length: hash_len,
     };
     hash_raw(pwd, salt, &config)
@@ -462,10 +462,10 @@ pub fn hash_raw_std(
     hash_len: u32,
 ) -> Result<Vec<u8>> {
     let config = Config {
-        variant: variant,
-        version: version,
-        mem_cost: mem_cost,
-        time_cost: time_cost,
+        variant,
+        version,
+        mem_cost,
+        time_cost,
         lanes: parallelism,
         thread_mode: ThreadMode::from_threads(parallelism),
         secret: &[],
@@ -516,8 +516,8 @@ pub fn verify_encoded_ext(encoded: &str, pwd: &[u8], secret: &[u8], ad: &[u8]) -
         time_cost: decoded.time_cost,
         lanes: decoded.parallelism,
         thread_mode: ThreadMode::from_threads(decoded.parallelism),
-        secret: secret,
-        ad: ad,
+        secret,
+        ad,
         hash_length: decoded.hash.len() as u32,
     };
     verify_raw(pwd, &decoded.salt, &decoded.hash, &config)
@@ -620,14 +620,14 @@ pub fn verify_raw_old(
     hash: &[u8],
 ) -> Result<bool> {
     let config = Config {
-        variant: variant,
-        version: version,
-        mem_cost: mem_cost,
-        time_cost: time_cost,
-        lanes: lanes,
+        variant,
+        version,
+        mem_cost,
+        time_cost,
+        lanes,
         thread_mode: ThreadMode::from_threads(threads),
-        secret: secret,
-        ad: ad,
+        secret,
+        ad,
         hash_length: hash.len() as u32,
     };
     verify_raw(pwd, salt, hash, &config)
@@ -696,10 +696,10 @@ pub fn verify_raw_std(
     hash: &[u8],
 ) -> Result<bool> {
     let config = Config {
-        variant: variant,
-        version: version,
-        mem_cost: mem_cost,
-        time_cost: time_cost,
+        variant,
+        version,
+        mem_cost,
+        time_cost,
         lanes: parallelism,
         thread_mode: ThreadMode::from_threads(parallelism),
         secret: &[],

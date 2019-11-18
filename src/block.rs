@@ -6,7 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use std::{fmt, mem};
+use std::fmt;
 use std::fmt::Debug;
 use std::ops::{BitXorAssign, Index, IndexMut};
 use crate::common;
@@ -17,13 +17,13 @@ pub struct Block([u64; common::QWORDS_IN_BLOCK]);
 impl Block {
     /// Gets the byte slice representation of the block.
     pub fn as_u8(&self) -> &[u8] {
-        let bytes: &[u8; common::BLOCK_SIZE] = unsafe { mem::transmute(&self.0) };
+        let bytes: &[u8; common::BLOCK_SIZE] = unsafe { &*(&self.0 as *const [u64; 128] as *const [u8; 1024]) };
         bytes
     }
 
     /// Gets the mutable byte slice representation of the block.
     pub fn as_u8_mut(&mut self) -> &mut [u8] {
-        let bytes: &mut [u8; common::BLOCK_SIZE] = unsafe { mem::transmute(&mut self.0) };
+        let bytes: &mut [u8; common::BLOCK_SIZE] = unsafe { &mut *(&mut self.0 as *mut [u64; 128] as *mut [u8; 1024]) };
         bytes
     }
 

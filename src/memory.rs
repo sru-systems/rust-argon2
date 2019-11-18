@@ -31,9 +31,9 @@ impl Memory {
         let total = rows * cols;
         let blocks = vec![Block::zero(); total].into_boxed_slice();
         Memory {
-            rows: rows,
-            cols: cols,
-            blocks: blocks,
+            rows,
+            cols,
+            blocks,
         }
     }
 

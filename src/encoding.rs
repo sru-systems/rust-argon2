@@ -43,13 +43,13 @@ pub fn decode_string(encoded: &str) -> Result<Decoded> {
         let hash = base64::decode(items[5])?;
 
         Ok(Decoded {
-            variant: variant,
-            version: version,
+            variant,
+            version,
             mem_cost: options.mem_cost,
             time_cost: options.time_cost,
             parallelism: options.parallelism,
-            salt: salt,
-            hash: hash,
+            salt,
+            hash,
         })
     } else if items.len() == 5 {
         decode_empty(items[0])?;
@@ -59,18 +59,17 @@ pub fn decode_string(encoded: &str) -> Result<Decoded> {
         let hash = base64::decode(items[4])?;
 
         Ok(Decoded {
-            variant: variant,
+            variant,
             version: Version::Version10,
             mem_cost: options.mem_cost,
             time_cost: options.time_cost,
             parallelism: options.parallelism,
-            salt: salt,
-            hash: hash,
+            salt,
+            hash,
         })
     } else {
-        return Err(Error::DecodingFail);
+        Err(Error::DecodingFail)
     }
-
 }
 
 fn decode_empty(str: &str) -> Result<()> {
