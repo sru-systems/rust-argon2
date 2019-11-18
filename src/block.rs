@@ -17,13 +17,13 @@ pub struct Block([u64; common::QWORDS_IN_BLOCK]);
 impl Block {
     /// Gets the byte slice representation of the block.
     pub fn as_u8(&self) -> &[u8] {
-        let bytes: &[u8; common::BLOCK_SIZE] = unsafe { &*(&self.0 as *const [u64; 128] as *const [u8; 1024]) };
+        let bytes: &[u8; common::BLOCK_SIZE] = unsafe { &*(&self.0 as *const [u64; common::QWORDS_IN_BLOCK] as *const [u8; common::BLOCK_SIZE]) };
         bytes
     }
 
     /// Gets the mutable byte slice representation of the block.
     pub fn as_u8_mut(&mut self) -> &mut [u8] {
-        let bytes: &mut [u8; common::BLOCK_SIZE] = unsafe { &mut *(&mut self.0 as *mut [u64; 128] as *mut [u8; 1024]) };
+        let bytes: &mut [u8; common::BLOCK_SIZE] = unsafe { &mut *(&mut self.0 as *mut [u64; common::QWORDS_IN_BLOCK] as *mut [u8; common::BLOCK_SIZE]) };
         bytes
     }
 
