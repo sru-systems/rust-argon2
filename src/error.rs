@@ -6,7 +6,6 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use base64;
 use std::{error, fmt};
 
 /// Error type for Argon2 errors.
@@ -107,7 +106,7 @@ impl error::Error for Error {
         self.msg()
     }
 
-    fn cause(&self) -> Option<&error::Error> {
+    fn cause(&self) -> Option<&dyn error::Error> {
         None
     }
 }

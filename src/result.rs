@@ -7,7 +7,7 @@
 // except according to those terms.
 
 use std::result;
-use super::error::Error;
+use crate::error::Error;
 
 /// A specialized result type for Argon2 operations.
 pub type Result<T> = result::Result<T, Error>;

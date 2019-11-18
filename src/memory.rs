@@ -9,7 +9,7 @@
 use std::fmt;
 use std::fmt::Debug;
 use std::ops::{Index, IndexMut};
-use super::block::Block;
+use crate::block::Block;
 
 /// Structure representing the memory matrix.
 pub struct Memory {
@@ -31,9 +31,9 @@ impl Memory {
         let total = rows * cols;
         let blocks = vec![Block::zero(); total].into_boxed_slice();
         Memory {
-            rows: rows,
-            cols: cols,
-            blocks: blocks,
+            rows,
+            cols,
+            blocks,
         }
     }
 
@@ -99,7 +99,7 @@ impl IndexMut<(u32, u32)> for Memory {
 #[cfg(test)]
 mod tests {
 
-    use super::*;
+    use crate::memory::Memory;
 
     #[test]
     fn new_returns_correct_instance() {

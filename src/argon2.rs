@@ -6,15 +6,15 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use super::context::Context;
-use super::config::Config;
-use super::core;
-use super::encoding;
-use super::memory::Memory;
-use super::result::Result;
-use super::thread_mode::ThreadMode;
-use super::variant::Variant;
-use super::version::Version;
+use crate::context::Context;
+use crate::config::Config;
+use crate::core;
+use crate::encoding;
+use crate::memory::Memory;
+use crate::result::Result;
+use crate::thread_mode::ThreadMode;
+use crate::variant::Variant;
+use crate::version::Version;
 
 /// Returns the length of the encoded string.
 ///
@@ -37,7 +37,7 @@ use super::version::Version;
 /// let enc_len = argon2::encoded_len(variant, mem, time, parallelism, salt_len, hash_len);
 /// assert_eq!(enc_len, 86);
 /// ```
-#[cfg_attr(rustfmt, rustfmt_skip)]
+#[rustfmt::skip]
 pub fn encoded_len(
     variant: Variant,
     mem_cost: u32,
@@ -184,14 +184,14 @@ pub fn hash_encoded_old(
     hash_len: u32,
 ) -> Result<String> {
     let config = Config {
-        variant: variant,
-        version: version,
-        mem_cost: mem_cost,
-        time_cost: time_cost,
-        lanes: lanes,
+        variant,
+        version,
+        mem_cost,
+        time_cost,
+        lanes,
         thread_mode: ThreadMode::from_threads(threads),
-        secret: secret,
-        ad: ad,
+        secret,
+        ad,
         hash_length: hash_len,
     };
     hash_encoded(pwd, salt, &config)
@@ -253,10 +253,10 @@ pub fn hash_encoded_std(
     hash_len: u32,
 ) -> Result<String> {
     let config = Config {
-        variant: variant,
-        version: version,
-        mem_cost: mem_cost,
-        time_cost: time_cost,
+        variant,
+        version,
+        mem_cost,
+        time_cost,
         lanes: parallelism,
         thread_mode: ThreadMode::from_threads(parallelism),
         secret: &[],
@@ -393,14 +393,14 @@ pub fn hash_raw_old(
     hash_len: u32,
 ) -> Result<Vec<u8>> {
     let config = Config {
-        variant: variant,
-        version: version,
-        mem_cost: mem_cost,
-        time_cost: time_cost,
-        lanes: lanes,
+        variant,
+        version,
+        mem_cost,
+        time_cost,
+        lanes,
         thread_mode: ThreadMode::from_threads(threads),
-        secret: secret,
-        ad: ad,
+        secret,
+        ad,
         hash_length: hash_len,
     };
     hash_raw(pwd, salt, &config)
@@ -462,10 +462,10 @@ pub fn hash_raw_std(
     hash_len: u32,
 ) -> Result<Vec<u8>> {
     let config = Config {
-        variant: variant,
-        version: version,
-        mem_cost: mem_cost,
-        time_cost: time_cost,
+        variant,
+        version,
+        mem_cost,
+        time_cost,
         lanes: parallelism,
         thread_mode: ThreadMode::from_threads(parallelism),
         secret: &[],
@@ -516,8 +516,8 @@ pub fn verify_encoded_ext(encoded: &str, pwd: &[u8], secret: &[u8], ad: &[u8]) -
         time_cost: decoded.time_cost,
         lanes: decoded.parallelism,
         thread_mode: ThreadMode::from_threads(decoded.parallelism),
-        secret: secret,
-        ad: ad,
+        secret,
+        ad,
         hash_length: decoded.hash.len() as u32,
     };
     verify_raw(pwd, &decoded.salt, &decoded.hash, &config)
@@ -620,14 +620,14 @@ pub fn verify_raw_old(
     hash: &[u8],
 ) -> Result<bool> {
     let config = Config {
-        variant: variant,
-        version: version,
-        mem_cost: mem_cost,
-        time_cost: time_cost,
-        lanes: lanes,
+        variant,
+        version,
+        mem_cost,
+        time_cost,
+        lanes,
         thread_mode: ThreadMode::from_threads(threads),
-        secret: secret,
-        ad: ad,
+        secret,
+        ad,
         hash_length: hash.len() as u32,
     };
     verify_raw(pwd, salt, hash, &config)
@@ -696,10 +696,10 @@ pub fn verify_raw_std(
     hash: &[u8],
 ) -> Result<bool> {
     let config = Config {
-        variant: variant,
-        version: version,
-        mem_cost: mem_cost,
-        time_cost: time_cost,
+        variant,
+        version,
+        mem_cost,
+        time_cost,
         lanes: parallelism,
         thread_mode: ThreadMode::from_threads(parallelism),
         secret: &[],

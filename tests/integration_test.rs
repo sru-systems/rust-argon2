@@ -8,9 +8,6 @@
 
 // These tests are based on Argon's test.c test suite.
 
-extern crate argon2;
-extern crate hex;
-
 use argon2::{Error, Config, ThreadMode, Variant, Version};
 use hex::ToHex;
 

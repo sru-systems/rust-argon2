@@ -6,12 +6,12 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use super::block::Block;
-use super::common;
-use super::context::Context;
-use super::memory::Memory;
-use super::variant::Variant;
-use super::version::Version;
+use crate::block::Block;
+use crate::common;
+use crate::context::Context;
+use crate::memory::Memory;
+use crate::variant::Variant;
+use crate::version::Version;
 use blake2b_simd::Params;
 use crossbeam_utils::thread::scope;
 use std::mem;
@@ -61,7 +61,7 @@ fn blake2b(out: &mut [u8], input: &[&[u8]]) {
 }
 
 fn f_bla_mka(x: u64, y: u64) -> u64 {
-    let m = 0xFFFFFFFFu64;
+    let m = 0xFFFF_FFFFu64;
     let xy = (x & m) * (y & m);
     x.wrapping_add(y.wrapping_add(xy.wrapping_add(xy)))
 }
@@ -278,15 +278,12 @@ fn fill_segment(context: &Context, position: &Position, memory: &mut Memory) {
         }
 
         // 1.2.2 Computing the lane of the reference block
-        let mut ref_lane = (pseudo_rand >> 32) % context.config.lanes as u64;
-        if (position.pass == 0) && (position.slice == 0) {
-            // Can not reference other lanes yet
-            ref_lane = position.lane as u64;
-        }
+        // If (position.pass == 0) && (position.slice == 0): can not reference other lanes yet
+        let ref_lane = if (position.pass == 0) && (position.slice == 0) { position.lane as u64 } else { (pseudo_rand >> 32) % context.config.lanes as u64 };
 
         // 1.2.3 Computing the number of possible reference block within the lane.
         position.index = i;
-        let pseudo_rand_u32 = (pseudo_rand & 0xFFFFFFFF) as u32;
+        let pseudo_rand_u32 = (pseudo_rand & 0xFFFF_FFFF) as u32;
         let same_lane = ref_lane == (position.lane as u64);
         let ref_index = index_alpha(context, &position, pseudo_rand_u32, same_lane);
 
@@ -294,16 +291,12 @@ fn fill_segment(context: &Context, position: &Position, memory: &mut Memory) {
         let index = context.lane_length as u64 * ref_lane + ref_index as u64;
         let mut curr_block = memory[curr_offset].clone();
         {
-            let ref prev_block = memory[prev_offset];
-            let ref ref_block = memory[index];
-            if context.config.version == Version::Version10 {
+            let prev_block = &memory[prev_offset];
+            let ref_block = &memory[index];
+            if context.config.version == Version::Version10 || position.pass == 0 {
                 fill_block(prev_block, ref_block, &mut curr_block, false);
             } else {
-                if position.pass == 0 {
-                    fill_block(prev_block, ref_block, &mut curr_block, false);
-                } else {
-                    fill_block(prev_block, ref_block, &mut curr_block, true);
-                }
+                fill_block(prev_block, ref_block, &mut curr_block, true);
             }
         }
 
@@ -333,13 +326,13 @@ fn h0(context: &Context) -> [u8; common::PREHASH_SEED_LENGTH] {
         &u32_as_32le(context.config.version.as_u32()),
         &u32_as_32le(context.config.variant.as_u32()),
         &len_as_32le(context.pwd),
-        context.pwd.as_ref(),
+        context.pwd,
         &len_as_32le(context.salt),
-        context.salt.as_ref(),
+        context.salt,
         &len_as_32le(context.config.secret),
-        context.config.secret.as_ref(),
+        context.config.secret,
         &len_as_32le(context.config.ad),
-        context.config.ad.as_ref(),
+        context.config.ad,
     ];
     let mut out = [0u8; common::PREHASH_SEED_LENGTH];
     blake2b(&mut out[0..common::PREHASH_DIGEST_LENGTH], &input);
@@ -382,34 +375,28 @@ fn index_alpha(context: &Context, position: &Position, pseudo_rand: u32, same_la
         if position.slice == 0 {
             // First slice
             position.index - 1
+        } else if same_lane {
+            // The same lane => add current segment
+            position.slice * context.segment_length + position.index - 1
+        } else if position.index == 0 {
+            position.slice * context.segment_length - 1
         } else {
-            if same_lane {
-                // The same lane => add current segment
-                position.slice * context.segment_length + position.index - 1
-            } else {
-                if position.index == 0 {
-                    position.slice * context.segment_length - 1
-                } else {
-                    position.slice * context.segment_length
-                }
-            }
+            position.slice * context.segment_length
         }
     } else {
         // Second pass
         if same_lane {
             context.lane_length - context.segment_length + position.index - 1
+        } else if position.index == 0 {
+            context.lane_length - context.segment_length - 1
         } else {
-            if position.index == 0 {
-                context.lane_length - context.segment_length - 1
-            } else {
-                context.lane_length - context.segment_length
-            }
+            context.lane_length - context.segment_length
         }
     };
     let reference_area_size = reference_area_size as u64;
     let mut relative_position = pseudo_rand as u64;
-    relative_position = relative_position * relative_position >> 32;
-    relative_position = reference_area_size - 1 - (reference_area_size * relative_position >> 32);
+    relative_position = (relative_position * relative_position) >> 32;
+    relative_position = reference_area_size - 1 - ((reference_area_size * relative_position) >> 32);
 
     // 1.2.5 Computing starting position
     let start_position: u32 = if position.pass != 0 {

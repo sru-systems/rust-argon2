@@ -38,7 +38,7 @@ impl Default for ThreadMode {
 #[cfg(test)]
 mod tests {
 
-    use super::*;
+    use crate::thread_mode::ThreadMode;
 
     #[test]
     fn default_returns_correct_thread_mode() {

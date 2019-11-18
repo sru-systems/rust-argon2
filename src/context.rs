@@ -6,10 +6,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use super::common;
-use super::config::Config;
-use super::error::Error;
-use super::result::Result;
+use crate::common;
+use crate::config::Config;
+use crate::error::Error;
+use crate::result::Result;
 
 /// Structure containing settings for the Argon2 algorithm. A combination of
 /// the original argon2_context and argon2_instance_t.
@@ -102,12 +102,12 @@ impl<'a> Context<'a> {
         let lane_length = segment_length * common::SYNC_POINTS;
 
         Ok(Context {
-            config: config,
-            lane_length: lane_length,
-            memory_blocks: memory_blocks,
-            pwd: pwd,
-            salt: salt,
-            segment_length: segment_length,
+            config,
+            lane_length,
+            memory_blocks,
+            pwd,
+            salt,
+            segment_length,
         })
     }
 }
@@ -116,11 +116,12 @@ impl<'a> Context<'a> {
 #[cfg(test)]
 mod tests {
 
-    use error::Error;
-    use super::*;
-    use thread_mode::ThreadMode;
-    use variant::Variant;
-    use version::Version;
+    use crate::config::Config;
+    use crate::context::Context;
+    use crate::error::Error;
+    use crate::thread_mode::ThreadMode;
+    use crate::variant::Variant;
+    use crate::version::Version;
 
     #[test]
     fn new_returns_correct_instance() {
