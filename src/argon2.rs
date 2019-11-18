@@ -37,7 +37,7 @@ use crate::version::Version;
 /// let enc_len = argon2::encoded_len(variant, mem, time, parallelism, salt_len, hash_len);
 /// assert_eq!(enc_len, 86);
 /// ```
-#[cfg_attr(rustfmt, rustfmt_skip)]
+#[rustfmt::skip]
 pub fn encoded_len(
     variant: Variant,
     mem_cost: u32,
