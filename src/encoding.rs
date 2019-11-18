@@ -131,7 +131,7 @@ fn decode_version(str: &str) -> Result<Version> {
 }
 
 /// Encodes the hash and context.
-pub fn encode_string(context: &Context, hash: &Vec<u8>) -> String {
+pub fn encode_string(context: &Context, hash: &[u8]) -> String {
     format!(
         "${}$v={}$m={},t={},p={}${}${}",
         context.config.variant,
