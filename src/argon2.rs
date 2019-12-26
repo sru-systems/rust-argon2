@@ -16,6 +16,8 @@ use crate::thread_mode::ThreadMode;
 use crate::variant::Variant;
 use crate::version::Version;
 
+use constant_time_eq::constant_time_eq;
+
 /// Returns the length of the encoded string.
 ///
 /// # Remarks
@@ -546,7 +548,8 @@ pub fn verify_raw(pwd: &[u8], salt: &[u8], hash: &[u8], config: &Config) -> Resu
         ..config.clone()
     };
     let context = Context::new(config, pwd, salt)?;
-    Ok(run(&context) == hash)
+    let calculated_hash = run(&context);
+    Ok(constant_time_eq(hash, &calculated_hash))
 }
 
 /// Verifies the password with the supplied settings (pre 0.2.0 `verify_raw`).
