@@ -4,6 +4,12 @@ ChangeLog for rust-argon2
 This documents all notable changes to
 [rust-argon2](https://github.com/sru-systems/rust-argon2).
 
+
+## 0.6.1
+
+- Use constant time equals to compare hashes.
+
+
 ## 0.6.0
 
 - Use 2018 edition or Rust
