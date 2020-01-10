@@ -18,7 +18,7 @@ name = "argon2"
 base64 = "0.11"
 blake2b_simd = "0.5"
 constant_time_eq = "0.1.4"
-crossbeam-utils = "0.6"
+crossbeam-utils = "0.7"
 
 [dev-dependencies]
 hex = "0.3"
