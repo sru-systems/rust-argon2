@@ -5,6 +5,11 @@ This documents all notable changes to
 [rust-argon2](https://github.com/sru-systems/rust-argon2).
 
 
+## 0.7.0
+
+- Update crossbeam-utils dependency to 0.7.
+
+
 ## 0.6.1
 
 - Use constant time equals to compare hashes.
