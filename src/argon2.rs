@@ -83,8 +83,10 @@ pub fn encoded_len(
 /// let salt = b"somesalt";
 /// let mut config = Config::default();
 /// config.variant = Variant::Argon2d;
-/// config.lanes = 4;
-/// config.thread_mode = ThreadMode::Parallel;
+#[cfg_attr(feature = "crossbeam-utils", doc = "config.lanes = 4;")]
+#[cfg_attr(feature = "crossbeam-utils", doc = "config.thread_mode = ThreadMode::Parallel;")]
+#[cfg_attr(not(feature = "crossbeam-utils"), doc = "config.lanes = 1;")]
+#[cfg_attr(not(feature = "crossbeam-utils"), doc = "config.thread_mode = ThreadMode::Sequential;")]
 /// let encoded = argon2::hash_encoded(pwd, salt, &config).unwrap();
 /// ```
 pub fn hash_encoded(pwd: &[u8], salt: &[u8], config: &Config) -> Result<String> {
@@ -293,8 +295,10 @@ pub fn hash_encoded_std(
 /// let salt = b"somesalt";
 /// let mut config = Config::default();
 /// config.variant = Variant::Argon2d;
-/// config.lanes = 4;
-/// config.thread_mode = ThreadMode::Parallel;
+#[cfg_attr(feature = "crossbeam-utils", doc = "config.lanes = 4;")]
+#[cfg_attr(feature = "crossbeam-utils", doc = "config.thread_mode = ThreadMode::Parallel;")]
+#[cfg_attr(not(feature = "crossbeam-utils"), doc = "config.lanes = 1;")]
+#[cfg_attr(not(feature = "crossbeam-utils"), doc = "config.thread_mode = ThreadMode::Sequential;")]
 /// let vec = argon2::hash_raw(pwd, salt, &config).unwrap();
 /// ```
 pub fn hash_raw(pwd: &[u8], salt: &[u8], config: &Config) -> Result<Vec<u8>> {

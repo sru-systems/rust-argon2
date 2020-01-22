@@ -13,6 +13,7 @@ use crate::memory::Memory;
 use crate::variant::Variant;
 use crate::version::Version;
 use blake2b_simd::Params;
+#[cfg(feature = "crossbeam-utils")]
 use crossbeam_utils::thread::scope;
 use std::mem;
 
@@ -183,6 +184,7 @@ fn fill_first_blocks(context: &Context, memory: &mut Memory, h0: &mut [u8]) {
     }
 }
 
+#[cfg(feature = "crossbeam-utils")]
 fn fill_memory_blocks_mt(context: &Context, memory: &mut Memory) {
     for p in 0..context.config.time_cost {
         for s in 0..common::SYNC_POINTS {
@@ -201,6 +203,11 @@ fn fill_memory_blocks_mt(context: &Context, memory: &mut Memory) {
             });
         }
     }
+}
+
+#[cfg(not(feature = "crossbeam-utils"))]
+fn fill_memory_blocks_mt(_: &Context, _: &mut Memory) {
+    unimplemented!()
 }
 
 fn fill_memory_blocks_st(context: &Context, memory: &mut Memory) {

@@ -78,6 +78,7 @@ fn test_argon2d_version10_4() {
     );
 }
 
+#[cfg(feature = "crossbeam-utils")]
 #[test]
 fn test_argon2d_version10_5() {
     hash_test(
@@ -229,6 +230,7 @@ fn test_argon2d_version13_4() {
     );
 }
 
+#[cfg(feature = "crossbeam-utils")]
 #[test]
 fn test_argon2d_version13_5() {
     hash_test(
@@ -380,6 +382,7 @@ fn test_argon2i_version10_4() {
     );
 }
 
+#[cfg(feature = "crossbeam-utils")]
 #[test]
 fn test_argon2i_version10_5() {
     hash_test(
@@ -531,6 +534,7 @@ fn test_argon2i_version13_4() {
     );
 }
 
+#[cfg(feature = "crossbeam-utils")]
 #[test]
 fn test_argon2i_version13_5() {
     hash_test(
@@ -682,6 +686,7 @@ fn test_argon2id_version10_4() {
     );
 }
 
+#[cfg(feature = "crossbeam-utils")]
 #[test]
 fn test_argon2id_version10_5() {
     hash_test(
@@ -833,6 +838,7 @@ fn test_argon2id_version13_4() {
     );
 }
 
+#[cfg(feature = "crossbeam-utils")]
 #[test]
 fn test_argon2id_version13_5() {
     hash_test(
