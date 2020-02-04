@@ -37,6 +37,7 @@ impl Memory {
         }
     }
 
+    #[cfg(feature = "crossbeam-utils")]
     /// Gets the mutable lanes representation of the memory matrix.
     pub fn as_lanes_mut(&mut self) -> Vec<&mut Memory> {
         let ptr: *mut Memory = self;
@@ -111,6 +112,7 @@ mod tests {
         assert_eq!(memory.blocks.len(), 512);
     }
 
+    #[cfg(feature = "crossbeam-utils")]
     #[test]
     fn as_lanes_mut_returns_correct_vec() {
         let mut memory = Memory::new(4, 128);

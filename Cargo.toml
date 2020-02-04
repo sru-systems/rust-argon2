@@ -14,11 +14,14 @@ keywords = ["argon2", "argon2d", "argon2i", "hash", "password"]
 [lib]
 name = "argon2"
 
+[features]
+default = ["crossbeam-utils"]
+
 [dependencies]
 base64 = "0.11"
 blake2b_simd = "0.5"
 constant_time_eq = "0.1.4"
-crossbeam-utils = "0.7"
+crossbeam-utils = { version = "0.7", optional = true }
 
 [dev-dependencies]
 hex = "0.3"
