@@ -5,6 +5,11 @@ This documents all notable changes to
 [rust-argon2](https://github.com/sru-systems/rust-argon2).
 
 
+## 0.8.0
+
+- Make parallelism optional via feature flag.
+
+
 ## 0.7.0
 
 - Update crossbeam-utils dependency to 0.7.
