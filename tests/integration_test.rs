@@ -78,7 +78,6 @@ fn test_argon2d_version10_4() {
     );
 }
 
-#[cfg(feature = "crossbeam-utils")]
 #[test]
 fn test_argon2d_version10_5() {
     hash_test(
@@ -230,7 +229,6 @@ fn test_argon2d_version13_4() {
     );
 }
 
-#[cfg(feature = "crossbeam-utils")]
 #[test]
 fn test_argon2d_version13_5() {
     hash_test(
@@ -382,7 +380,6 @@ fn test_argon2i_version10_4() {
     );
 }
 
-#[cfg(feature = "crossbeam-utils")]
 #[test]
 fn test_argon2i_version10_5() {
     hash_test(
@@ -534,7 +531,6 @@ fn test_argon2i_version13_4() {
     );
 }
 
-#[cfg(feature = "crossbeam-utils")]
 #[test]
 fn test_argon2i_version13_5() {
     hash_test(
@@ -686,7 +682,6 @@ fn test_argon2id_version10_4() {
     );
 }
 
-#[cfg(feature = "crossbeam-utils")]
 #[test]
 fn test_argon2id_version10_5() {
     hash_test(
@@ -838,7 +833,6 @@ fn test_argon2id_version13_4() {
     );
 }
 
-#[cfg(feature = "crossbeam-utils")]
 #[test]
 fn test_argon2id_version13_5() {
     hash_test(
@@ -1053,13 +1047,14 @@ fn hash_test(
     hex: &str,
     enc: &str,
 ) {
+    let threads = if cfg!(feature = "crossbeam-utils") { p } else { 1 };
     let config = Config {
         variant: var,
         version: ver,
         mem_cost: m,
         time_cost: t,
         lanes: p,
-        thread_mode: ThreadMode::from_threads(p),
+        thread_mode: ThreadMode::from_threads(threads),
         secret: &[],
         ad: &[],
         hash_length: 32,
