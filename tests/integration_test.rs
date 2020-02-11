@@ -8,7 +8,7 @@
 
 // These tests are based on Argon's test.c test suite.
 
-use argon2::{Error, Config, ThreadMode, Variant, Version};
+use argon2::{Config, Error, ThreadMode, Variant, Version};
 use hex::ToHex;
 
 #[cfg(not(debug_assertions))]
@@ -994,8 +994,14 @@ fn test_verify_encoded_with_wrong_password_version13() {
 #[test]
 fn test_encoded_len_returns_correct_length() {
     assert_eq!(argon2::encoded_len(Variant::Argon2d, 256, 1, 1, 8, 32), 83);
-    assert_eq!(argon2::encoded_len(Variant::Argon2i, 4096, 10, 10, 8, 32), 86);
-    assert_eq!(argon2::encoded_len(Variant::Argon2id, 65536, 100, 10, 8, 32), 89);
+    assert_eq!(
+        argon2::encoded_len(Variant::Argon2i, 4096, 10, 10, 8, 32),
+        86
+    );
+    assert_eq!(
+        argon2::encoded_len(Variant::Argon2id, 65536, 100, 10, 8, 32),
+        89
+    );
 }
 
 #[test]

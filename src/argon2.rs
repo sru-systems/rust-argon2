@@ -6,8 +6,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use crate::context::Context;
 use crate::config::Config;
+use crate::context::Context;
 use crate::core;
 use crate::encoding;
 use crate::memory::Memory;
@@ -84,9 +84,15 @@ pub fn encoded_len(
 /// let mut config = Config::default();
 /// config.variant = Variant::Argon2d;
 #[cfg_attr(feature = "crossbeam-utils", doc = "config.lanes = 4;")]
-#[cfg_attr(feature = "crossbeam-utils", doc = "config.thread_mode = ThreadMode::Parallel;")]
+#[cfg_attr(
+    feature = "crossbeam-utils",
+    doc = "config.thread_mode = ThreadMode::Parallel;"
+)]
 #[cfg_attr(not(feature = "crossbeam-utils"), doc = "config.lanes = 1;")]
-#[cfg_attr(not(feature = "crossbeam-utils"), doc = "config.thread_mode = ThreadMode::Sequential;")]
+#[cfg_attr(
+    not(feature = "crossbeam-utils"),
+    doc = "config.thread_mode = ThreadMode::Sequential;"
+)]
 /// let encoded = argon2::hash_encoded(pwd, salt, &config).unwrap();
 /// ```
 pub fn hash_encoded(pwd: &[u8], salt: &[u8], config: &Config) -> Result<String> {
@@ -298,9 +304,15 @@ pub fn hash_encoded_std(
 /// let mut config = Config::default();
 /// config.variant = Variant::Argon2d;
 #[cfg_attr(feature = "crossbeam-utils", doc = "config.lanes = 4;")]
-#[cfg_attr(feature = "crossbeam-utils", doc = "config.thread_mode = ThreadMode::Parallel;")]
+#[cfg_attr(
+    feature = "crossbeam-utils",
+    doc = "config.thread_mode = ThreadMode::Parallel;"
+)]
 #[cfg_attr(not(feature = "crossbeam-utils"), doc = "config.lanes = 1;")]
-#[cfg_attr(not(feature = "crossbeam-utils"), doc = "config.thread_mode = ThreadMode::Sequential;")]
+#[cfg_attr(
+    not(feature = "crossbeam-utils"),
+    doc = "config.thread_mode = ThreadMode::Sequential;"
+)]
 /// let vec = argon2::hash_raw(pwd, salt, &config).unwrap();
 /// ```
 pub fn hash_raw(pwd: &[u8], salt: &[u8], config: &Config) -> Result<Vec<u8>> {

@@ -81,7 +81,6 @@ impl<'a> Default for Config<'a> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
 
