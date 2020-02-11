@@ -286,7 +286,11 @@ fn fill_segment(context: &Context, position: &Position, memory: &mut Memory) {
 
         // 1.2.2 Computing the lane of the reference block
         // If (position.pass == 0) && (position.slice == 0): can not reference other lanes yet
-        let ref_lane = if (position.pass == 0) && (position.slice == 0) { position.lane as u64 } else { (pseudo_rand >> 32) % context.config.lanes as u64 };
+        let ref_lane = if (position.pass == 0) && (position.slice == 0) {
+            position.lane as u64
+        } else {
+            (pseudo_rand >> 32) % context.config.lanes as u64
+        };
 
         // 1.2.3 Computing the number of possible reference block within the lane.
         position.index = i;

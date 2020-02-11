@@ -42,7 +42,6 @@ impl Default for ThreadMode {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
 

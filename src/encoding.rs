@@ -6,13 +6,13 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use base64;
 use crate::context::Context;
 use crate::decoded::Decoded;
 use crate::error::Error;
 use crate::result::Result;
 use crate::variant::Variant;
 use crate::version::Version;
+use base64;
 
 /// Structure containing the options.
 struct Options {
@@ -155,7 +155,6 @@ pub fn num_len(number: u32) -> u32 {
     len
 }
 
-
 #[cfg(test)]
 mod tests {
 
@@ -164,9 +163,9 @@ mod tests {
     #[cfg(feature = "crossbeam-utils")]
     use crate::context::Context;
     use crate::decoded::Decoded;
-    use crate::encoding::{base64_len, decode_string, num_len};
     #[cfg(feature = "crossbeam-utils")]
     use crate::encoding::encode_string;
+    use crate::encoding::{base64_len, decode_string, num_len};
     use crate::error::Error;
     #[cfg(feature = "crossbeam-utils")]
     use crate::thread_mode::ThreadMode;

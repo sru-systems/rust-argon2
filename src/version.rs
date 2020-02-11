@@ -6,9 +6,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use std::fmt;
 use crate::error::Error;
 use crate::result::Result;
+use std::fmt;
 
 /// The Argon2 version.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, PartialOrd, Ord)]
@@ -56,7 +56,6 @@ impl fmt::Display for Version {
         write!(f, "{}", self.as_u32())
     }
 }
-
 
 #[cfg(test)]
 mod tests {

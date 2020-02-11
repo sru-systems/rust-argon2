@@ -6,10 +6,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use crate::block::Block;
 use std::fmt;
 use std::fmt::Debug;
 use std::ops::{Index, IndexMut};
-use crate::block::Block;
 
 /// Structure representing the memory matrix.
 pub struct Memory {
@@ -30,11 +30,7 @@ impl Memory {
         let cols = lane_length as usize;
         let total = rows * cols;
         let blocks = vec![Block::zero(); total].into_boxed_slice();
-        Memory {
-            rows,
-            cols,
-            blocks,
-        }
+        Memory { rows, cols, blocks }
     }
 
     #[cfg(feature = "crossbeam-utils")]
@@ -95,7 +91,6 @@ impl IndexMut<(u32, u32)> for Memory {
         &mut self.blocks[pos]
     }
 }
-
 
 #[cfg(test)]
 mod tests {
