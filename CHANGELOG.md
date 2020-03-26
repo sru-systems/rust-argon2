@@ -5,6 +5,11 @@ This documents all notable changes to
 [rust-argon2](https://github.com/sru-systems/rust-argon2).
 
 
+## 0.8.2
+
+- Change base64 to latest version (0.12).
+
+
 ## 0.8.1
 
 - Fix issue with verifying multi-lane hashes with parallelism disabled (#27)
