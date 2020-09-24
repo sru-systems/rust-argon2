@@ -12,7 +12,7 @@ use std::{error, fmt};
 use serde::{Deserialize, Serialize};
 
 /// Error type for Argon2 errors.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum Error {
