@@ -8,8 +8,13 @@
 
 use std::{error, fmt};
 
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 /// Error type for Argon2 errors.
 #[derive(Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum Error {
     /// The output (hash) is too short (minimum is 4).
     OutputTooShort,
