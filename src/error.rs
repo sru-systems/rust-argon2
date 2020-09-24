@@ -9,7 +9,7 @@
 use std::{error, fmt};
 
 /// Error type for Argon2 errors.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Error {
     /// The output (hash) is too short (minimum is 4).
     OutputTooShort,
