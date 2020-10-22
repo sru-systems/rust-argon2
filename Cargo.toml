@@ -21,7 +21,7 @@ default = ["crossbeam-utils"]
 base64 = "0.13"
 blake2b_simd = "0.5"
 constant_time_eq = "0.1.4"
-crossbeam-utils = { version = "0.7", optional = true }
+crossbeam-utils = { version = "0.8", optional = true }
 serde = { version = "1.0.116", optional = true, features=["derive"] }
 
 [dev-dependencies]
