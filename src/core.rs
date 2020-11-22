@@ -15,7 +15,6 @@ use crate::version::Version;
 use blake2b_simd::Params;
 #[cfg(feature = "crossbeam-utils")]
 use crossbeam_utils::thread::scope;
-use std::mem;
 
 /// Position of the block currently being operated on.
 #[derive(Clone, Debug)]
@@ -174,12 +173,12 @@ fn fill_first_blocks(context: &Context, memory: &mut Memory, h0: &mut [u8]) {
     for lane in 0..context.config.lanes {
         let start = common::PREHASH_DIGEST_LENGTH;
         // H'(H0||0||i)
-        h0[start..(start + 4)].clone_from_slice(&u32_as_32le(0));
-        h0[(start + 4)..(start + 8)].clone_from_slice(&u32_as_32le(lane));
+        h0[start..(start + 4)].clone_from_slice(&u32::to_le_bytes(0));
+        h0[(start + 4)..(start + 8)].clone_from_slice(&u32::to_le_bytes(lane));
         hprime(memory[(lane, 0)].as_u8_mut(), &h0);
 
         // H'(H0||1||i)
-        h0[start..(start + 4)].clone_from_slice(&u32_as_32le(1));
+        h0[start..(start + 4)].clone_from_slice(&u32::to_le_bytes(1));
         hprime(memory[(lane, 1)].as_u8_mut(), &h0);
     }
 }
@@ -330,12 +329,12 @@ fn g(a: &mut u64, b: &mut u64, c: &mut u64, d: &mut u64) {
 
 fn h0(context: &Context) -> [u8; common::PREHASH_SEED_LENGTH] {
     let input = [
-        &u32_as_32le(context.config.lanes),
-        &u32_as_32le(context.config.hash_length),
-        &u32_as_32le(context.config.mem_cost),
-        &u32_as_32le(context.config.time_cost),
-        &u32_as_32le(context.config.version.as_u32()),
-        &u32_as_32le(context.config.variant.as_u32()),
+        &u32::to_le_bytes(context.config.lanes),
+        &u32::to_le_bytes(context.config.hash_length),
+        &u32::to_le_bytes(context.config.mem_cost),
+        &u32::to_le_bytes(context.config.time_cost),
+        &u32::to_le_bytes(context.config.version.as_u32()),
+        &u32::to_le_bytes(context.config.variant.as_u32()),
         &len_as_32le(context.pwd),
         context.pwd,
         &len_as_32le(context.salt),
@@ -353,12 +352,12 @@ fn h0(context: &Context) -> [u8; common::PREHASH_SEED_LENGTH] {
 fn hprime(out: &mut [u8], input: &[u8]) {
     let out_len = out.len();
     if out_len <= common::BLAKE2B_OUT_LENGTH {
-        blake2b(out, &[&u32_as_32le(out_len as u32), input]);
+        blake2b(out, &[&u32::to_le_bytes(out_len as u32), input]);
     } else {
         let ai_len = 32;
         let mut out_buffer = [0u8; common::BLAKE2B_OUT_LENGTH];
         let mut in_buffer = [0u8; common::BLAKE2B_OUT_LENGTH];
-        blake2b(&mut out_buffer, &[&u32_as_32le(out_len as u32), input]);
+        blake2b(&mut out_buffer, &[&u32::to_le_bytes(out_len as u32), input]);
         out[0..ai_len].clone_from_slice(&out_buffer[0..ai_len]);
         let mut out_pos = ai_len;
         let mut to_produce = out_len - ai_len;
@@ -426,7 +425,7 @@ fn index_alpha(context: &Context, position: &Position, pseudo_rand: u32, same_la
 }
 
 fn len_as_32le(slice: &[u8]) -> [u8; 4] {
-    u32_as_32le(slice.len() as u32)
+    u32::to_le_bytes(slice.len() as u32)
 }
 
 fn next_addresses(address_block: &mut Block, input_block: &mut Block, zero_block: &Block) {
@@ -465,8 +464,4 @@ fn p(
 
 fn rotr64(w: u64, c: u32) -> u64 {
     (w >> c) | (w << (64 - c))
-}
-
-fn u32_as_32le(val: u32) -> [u8; 4] {
-    unsafe { mem::transmute(val.to_le()) }
 }
