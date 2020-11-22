@@ -5,6 +5,16 @@ This documents all notable changes to
 [rust-argon2](https://github.com/sru-systems/rust-argon2).
 
 
+## 0.8.3
+
+- Replace transmute with to_le_bytes.
+- Update base64 to version 0.13.
+- Update crossbeam-utils to version 0.8.
+- Update hex to version 0.4.
+- Derive Clone for Error struct.
+- Add optional serde support for Error struct.
+
+
 ## 0.8.2
 
 - Change base64 to latest version (0.12).
