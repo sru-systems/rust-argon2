@@ -57,7 +57,7 @@ fn decode_option<T: FromStr>(s: &str, name: &str) -> Result<T> {
 }
 
 /// Structure that contains the decoded data.
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Decoded {
     /// The variant.
     pub variant: Variant,
