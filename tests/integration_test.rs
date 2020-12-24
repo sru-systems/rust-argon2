@@ -1053,7 +1053,11 @@ fn hash_test(
     hex: &str,
     enc: &str,
 ) {
-    let threads = if cfg!(feature = "crossbeam-utils") { p } else { 1 };
+    let threads = if cfg!(feature = "crossbeam-utils") {
+        p
+    } else {
+        1
+    };
     let config = Config {
         variant: var,
         version: ver,

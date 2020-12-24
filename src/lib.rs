@@ -100,6 +100,7 @@ mod version;
 
 pub use crate::argon2::*;
 pub use crate::config::Config;
+pub use crate::decoded::Decoded;
 pub use crate::error::Error;
 pub use crate::result::Result;
 pub use crate::thread_mode::ThreadMode;

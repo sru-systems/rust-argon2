@@ -9,6 +9,7 @@
 use crate::error::Error;
 use crate::result::Result;
 use std::fmt;
+use std::str::FromStr;
 
 /// The Argon2 variant.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, PartialOrd, Ord)]
@@ -24,6 +25,22 @@ pub enum Variant {
 
     /// Argon2 using hybrid construction.
     Argon2id = 2,
+}
+
+impl FromStr for Variant {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self> {
+        match s {
+            "Argon2d" => Ok(Variant::Argon2d),
+            "Argon2i" => Ok(Variant::Argon2i),
+            "Argon2id" => Ok(Variant::Argon2id),
+            "argon2d" => Ok(Variant::Argon2d),
+            "argon2i" => Ok(Variant::Argon2i),
+            "argon2id" => Ok(Variant::Argon2id),
+            _ => Err(Error::DecodingFail),
+        }
+    }
 }
 
 impl Variant {
@@ -55,19 +72,6 @@ impl Variant {
         }
     }
 
-    /// Attempts to create a variant from a string slice.
-    pub fn from_str(str: &str) -> Result<Variant> {
-        match str {
-            "Argon2d" => Ok(Variant::Argon2d),
-            "Argon2i" => Ok(Variant::Argon2i),
-            "Argon2id" => Ok(Variant::Argon2id),
-            "argon2d" => Ok(Variant::Argon2d),
-            "argon2i" => Ok(Variant::Argon2i),
-            "argon2id" => Ok(Variant::Argon2id),
-            _ => Err(Error::DecodingFail),
-        }
-    }
-
     /// Attempts to create a variant from an u32.
     pub fn from_u32(val: u32) -> Result<Variant> {
         match val {
@@ -96,6 +100,7 @@ mod tests {
 
     use crate::error::Error;
     use crate::variant::Variant;
+    use std::str::FromStr;
 
     #[test]
     fn as_lowercase_str_returns_correct_str() {

@@ -9,6 +9,7 @@
 use crate::error::Error;
 use crate::result::Result;
 use std::fmt;
+use std::str::FromStr;
 
 /// The Argon2 version.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, PartialOrd, Ord)]
@@ -20,19 +21,23 @@ pub enum Version {
     Version13 = 0x13,
 }
 
-impl Version {
-    /// Gets the u32 representation of the version.
-    pub fn as_u32(&self) -> u32 {
-        *self as u32
-    }
+impl FromStr for Version {
+    type Err = Error;
 
     /// Attempts to create a version from a string slice.
-    pub fn from_str(str: &str) -> Result<Version> {
-        match str {
+    fn from_str(s: &str) -> Result<Self> {
+        match s {
             "16" => Ok(Version::Version10),
             "19" => Ok(Version::Version13),
             _ => Err(Error::DecodingFail),
         }
+    }
+}
+
+impl Version {
+    /// Gets the u32 representation of the version.
+    pub fn as_u32(&self) -> u32 {
+        *self as u32
     }
 
     /// Attempts to create a version from an u32.
@@ -62,6 +67,7 @@ mod tests {
 
     use crate::error::Error;
     use crate::version::Version;
+    use std::str::FromStr;
 
     #[test]
     fn as_u32_returns_correct_u32() {

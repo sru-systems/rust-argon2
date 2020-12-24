@@ -9,14 +9,15 @@
 use crate::config::Config;
 use crate::context::Context;
 use crate::core;
+use crate::decoded::Decoded;
 use crate::encoding;
 use crate::memory::Memory;
 use crate::result::Result;
 use crate::thread_mode::ThreadMode;
 use crate::variant::Variant;
 use crate::version::Version;
-
 use constant_time_eq::constant_time_eq;
+use std::str::FromStr;
 
 /// Returns the length of the encoded string.
 ///
@@ -193,7 +194,11 @@ pub fn hash_encoded_old(
     ad: &[u8],
     hash_len: u32,
 ) -> Result<String> {
-    let threads = if cfg!(feature = "crossbeam-utils") { threads } else { 1 };
+    let threads = if cfg!(feature = "crossbeam-utils") {
+        threads
+    } else {
+        1
+    };
     let config = Config {
         variant,
         version,
@@ -263,7 +268,11 @@ pub fn hash_encoded_std(
     salt: &[u8],
     hash_len: u32,
 ) -> Result<String> {
-    let threads = if cfg!(feature = "crossbeam-utils") { parallelism } else { 1 };
+    let threads = if cfg!(feature = "crossbeam-utils") {
+        parallelism
+    } else {
+        1
+    };
     let config = Config {
         variant,
         version,
@@ -412,7 +421,11 @@ pub fn hash_raw_old(
     ad: &[u8],
     hash_len: u32,
 ) -> Result<Vec<u8>> {
-    let threads = if cfg!(feature = "crossbeam-utils") { threads } else { 1 };
+    let threads = if cfg!(feature = "crossbeam-utils") {
+        threads
+    } else {
+        1
+    };
     let config = Config {
         variant,
         version,
@@ -482,7 +495,11 @@ pub fn hash_raw_std(
     salt: &[u8],
     hash_len: u32,
 ) -> Result<Vec<u8>> {
-    let threads = if cfg!(feature = "crossbeam-utils") { parallelism } else { 1 };
+    let threads = if cfg!(feature = "crossbeam-utils") {
+        parallelism
+    } else {
+        1
+    };
     let config = Config {
         variant,
         version,
@@ -530,8 +547,20 @@ pub fn verify_encoded(encoded: &str, pwd: &[u8]) -> Result<bool> {
 /// assert!(res);
 /// ```
 pub fn verify_encoded_ext(encoded: &str, pwd: &[u8], secret: &[u8], ad: &[u8]) -> Result<bool> {
-    let decoded = encoding::decode_string(encoded)?;
-    let threads = if cfg!(feature = "crossbeam-utils") { decoded.parallelism } else { 1 };
+    let decoded = Decoded::from_str(encoded)?;
+    verify_parsed_ext(decoded, pwd, secret, ad)
+}
+
+pub fn verify_parsed(decoded: Decoded, pwd: &[u8]) -> Result<bool> {
+    verify_parsed_ext(decoded, pwd, &[], &[])
+}
+
+pub fn verify_parsed_ext(decoded: Decoded, pwd: &[u8], secret: &[u8], ad: &[u8]) -> Result<bool> {
+    let threads = if cfg!(feature = "crossbeam-utils") {
+        decoded.parallelism
+    } else {
+        1
+    };
     let config = Config {
         variant: decoded.variant,
         version: decoded.version,
@@ -643,7 +672,11 @@ pub fn verify_raw_old(
     ad: &[u8],
     hash: &[u8],
 ) -> Result<bool> {
-    let threads = if cfg!(feature = "crossbeam-utils") { threads } else { 1 };
+    let threads = if cfg!(feature = "crossbeam-utils") {
+        threads
+    } else {
+        1
+    };
     let config = Config {
         variant,
         version,
@@ -720,7 +753,11 @@ pub fn verify_raw_std(
     salt: &[u8],
     hash: &[u8],
 ) -> Result<bool> {
-    let threads = if cfg!(feature = "crossbeam-utils") { parallelism } else { 1 };
+    let threads = if cfg!(feature = "crossbeam-utils") {
+        parallelism
+    } else {
+        1
+    };
     let config = Config {
         variant,
         version,
