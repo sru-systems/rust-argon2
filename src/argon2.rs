@@ -587,7 +587,7 @@ pub fn verify_digest(decoded: &Digest, pwd: &[u8]) -> Result<bool> {
 /// let ad = b"ad";
 ///
 /// let is_matches = argon2::verify_digest_ext(&digest, pwd, secret, ad).unwrap();
-/// assert_eq!(is_matches)
+/// assert_eq!(is_matches);
 /// ```
 pub fn verify_digest_ext(decoded: &Digest, pwd: &[u8], secret: &[u8], ad: &[u8]) -> Result<bool> {
     let threads = if cfg!(feature = "crossbeam-utils") {

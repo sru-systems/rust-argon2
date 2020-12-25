@@ -6,56 +6,13 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use std::{fmt, str::FromStr};
+
 use crate::error::Error;
 use crate::error::Error::DecodingFail;
 use crate::result::Result;
 use crate::variant::Variant;
 use crate::version::Version;
-use std::fmt;
-use std::str::FromStr;
-
-fn decode_option<T: FromStr>(s: &str, name: &str) -> Result<T> {
-    let mut items = s.split('=');
-    if items.next() != Some(name) {
-        return Err(DecodingFail);
-    }
-    let option = items
-        .next()
-        .and_then(|val| val.parse().ok())
-        .ok_or(DecodingFail)?;
-
-    if items.next().is_none() {
-        Ok(option)
-    } else {
-        Err(DecodingFail)
-    }
-}
-
-/// Structure containing the options.
-struct Options {
-    mem_cost: u32,
-    time_cost: u32,
-    parallelism: u32,
-}
-
-impl FromStr for Options {
-    type Err = Error;
-
-    fn from_str(s: &str) -> Result<Self> {
-        let mut items = s.split(',');
-        let out = Self {
-            mem_cost: decode_option(items.next().ok_or(DecodingFail)?, "m")?,
-            time_cost: decode_option(items.next().ok_or(DecodingFail)?, "t")?,
-            parallelism: decode_option(items.next().ok_or(DecodingFail)?, "p")?,
-        };
-
-        if items.next().is_none() {
-            Ok(out)
-        } else {
-            Err(DecodingFail)
-        }
-    }
-}
 
 /// Parsed representation of the [Argon2] hash in encoded form.
 ///
@@ -142,6 +99,49 @@ impl FromStr for Digest {
                 salt: base64::decode(items[3])?,
                 hash: base64::decode(items[4])?,
             })
+        } else {
+            Err(DecodingFail)
+        }
+    }
+}
+
+fn decode_option<T: FromStr>(s: &str, name: &str) -> Result<T> {
+    let mut items = s.split('=');
+    if items.next() != Some(name) {
+        return Err(DecodingFail);
+    }
+    let option = items
+        .next()
+        .and_then(|val| val.parse().ok())
+        .ok_or(DecodingFail)?;
+
+    if items.next().is_none() {
+        Ok(option)
+    } else {
+        Err(DecodingFail)
+    }
+}
+
+/// Structure containing the options.
+struct Options {
+    mem_cost: u32,
+    time_cost: u32,
+    parallelism: u32,
+}
+
+impl FromStr for Options {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self> {
+        let mut items = s.split(',');
+        let out = Self {
+            mem_cost: decode_option(items.next().ok_or(DecodingFail)?, "m")?,
+            time_cost: decode_option(items.next().ok_or(DecodingFail)?, "t")?,
+            parallelism: decode_option(items.next().ok_or(DecodingFail)?, "p")?,
+        };
+
+        if items.next().is_none() {
+            Ok(out)
         } else {
             Err(DecodingFail)
         }

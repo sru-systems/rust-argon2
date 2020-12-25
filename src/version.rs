@@ -6,10 +6,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use std::{fmt, str::FromStr};
+
 use crate::error::Error;
 use crate::result::Result;
-use std::fmt;
-use std::str::FromStr;
 
 /// The Argon2 version.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, PartialOrd, Ord)]
@@ -19,19 +19,6 @@ pub enum Version {
 
     /// Version 0x13 (Recommended).
     Version13 = 0x13,
-}
-
-impl FromStr for Version {
-    type Err = Error;
-
-    /// Attempts to create a version from a string slice.
-    fn from_str(s: &str) -> Result<Self> {
-        match s {
-            "16" => Ok(Version::Version10),
-            "19" => Ok(Version::Version13),
-            _ => Err(Error::DecodingFail),
-        }
-    }
 }
 
 impl Version {
@@ -46,6 +33,19 @@ impl Version {
             0x10 => Ok(Version::Version10),
             0x13 => Ok(Version::Version13),
             _ => Err(Error::IncorrectVersion),
+        }
+    }
+}
+
+impl FromStr for Version {
+    type Err = Error;
+
+    /// Attempts to create a version from a string slice.
+    fn from_str(str: &str) -> Result<Self> {
+        match str {
+            "16" => Ok(Version::Version10),
+            "19" => Ok(Version::Version13),
+            _ => Err(Error::DecodingFail),
         }
     }
 }
@@ -65,9 +65,10 @@ impl fmt::Display for Version {
 #[cfg(test)]
 mod tests {
 
+    use std::str::FromStr;
+
     use crate::error::Error;
     use crate::version::Version;
-    use std::str::FromStr;
 
     #[test]
     fn as_u32_returns_correct_u32() {

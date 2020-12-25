@@ -6,8 +6,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use crate::context::Context;
 use base64;
+
+use crate::context::Context;
 
 /// Gets the base64 encoded length of a byte slice with the specified length.
 pub fn base64_len(length: u32) -> u32 {
