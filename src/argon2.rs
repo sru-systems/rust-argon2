@@ -194,11 +194,7 @@ pub fn hash_encoded_old(
     ad: &[u8],
     hash_len: u32,
 ) -> Result<String> {
-    let threads = if cfg!(feature = "crossbeam-utils") {
-        threads
-    } else {
-        1
-    };
+    let threads = if cfg!(feature = "crossbeam-utils") { threads } else { 1 };
     let config = Config {
         variant,
         version,
@@ -268,11 +264,7 @@ pub fn hash_encoded_std(
     salt: &[u8],
     hash_len: u32,
 ) -> Result<String> {
-    let threads = if cfg!(feature = "crossbeam-utils") {
-        parallelism
-    } else {
-        1
-    };
+    let threads = if cfg!(feature = "crossbeam-utils") { parallelism } else { 1 };
     let config = Config {
         variant,
         version,
@@ -421,11 +413,7 @@ pub fn hash_raw_old(
     ad: &[u8],
     hash_len: u32,
 ) -> Result<Vec<u8>> {
-    let threads = if cfg!(feature = "crossbeam-utils") {
-        threads
-    } else {
-        1
-    };
+    let threads = if cfg!(feature = "crossbeam-utils") { threads } else { 1 };
     let config = Config {
         variant,
         version,
@@ -495,11 +483,7 @@ pub fn hash_raw_std(
     salt: &[u8],
     hash_len: u32,
 ) -> Result<Vec<u8>> {
-    let threads = if cfg!(feature = "crossbeam-utils") {
-        parallelism
-    } else {
-        1
-    };
+    let threads = if cfg!(feature = "crossbeam-utils") { parallelism } else { 1 };
     let config = Config {
         variant,
         version,
@@ -697,11 +681,7 @@ pub fn verify_raw_old(
     ad: &[u8],
     hash: &[u8],
 ) -> Result<bool> {
-    let threads = if cfg!(feature = "crossbeam-utils") {
-        threads
-    } else {
-        1
-    };
+    let threads = if cfg!(feature = "crossbeam-utils") { threads } else { 1 };
     let config = Config {
         variant,
         version,
@@ -778,11 +758,7 @@ pub fn verify_raw_std(
     salt: &[u8],
     hash: &[u8],
 ) -> Result<bool> {
-    let threads = if cfg!(feature = "crossbeam-utils") {
-        parallelism
-    } else {
-        1
-    };
+    let threads = if cfg!(feature = "crossbeam-utils") { parallelism } else { 1 };
     let config = Config {
         variant,
         version,
