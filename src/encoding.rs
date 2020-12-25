@@ -52,11 +52,9 @@ mod tests {
     use crate::config::Config;
     #[cfg(feature = "crossbeam-utils")]
     use crate::context::Context;
-    use crate::digest::Digest;
     #[cfg(feature = "crossbeam-utils")]
     use crate::encoding::encode_string;
     use crate::encoding::{base64_len, num_len};
-    use crate::error::Error;
     #[cfg(feature = "crossbeam-utils")]
     use crate::thread_mode::ThreadMode;
     use crate::variant::Variant;
