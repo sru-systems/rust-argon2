@@ -11,7 +11,25 @@ use crate::error::Error::DecodingFail;
 use crate::result::Result;
 use crate::variant::Variant;
 use crate::version::Version;
+use std::fmt;
 use std::str::FromStr;
+
+fn decode_option<T: FromStr>(s: &str, name: &str) -> Result<T> {
+    let mut items = s.split('=');
+    if items.next() != Some(name) {
+        return Err(DecodingFail);
+    }
+    let option = items
+        .next()
+        .and_then(|val| val.parse().ok())
+        .ok_or(DecodingFail)?;
+
+    if items.next().is_none() {
+        Ok(option)
+    } else {
+        Err(DecodingFail)
+    }
+}
 
 /// Structure containing the options.
 struct Options {
@@ -39,39 +57,35 @@ impl FromStr for Options {
     }
 }
 
-fn decode_option<T: FromStr>(s: &str, name: &str) -> Result<T> {
-    let mut items = s.split('=');
-    if items.next() != Some(name) {
-        return Err(DecodingFail);
-    }
-    let option = items
-        .next()
-        .and_then(|val| val.parse().ok())
-        .ok_or(DecodingFail)?;
-
-    if items.next().is_none() {
-        Ok(option)
-    } else {
-        Err(DecodingFail)
-    }
-}
-
-/// Structure that contains the decoded data.
+/// Parsed representation of the [Argon2] hash in encoded form.
+///
+/// You can parse [`Digest`] hash from the [`str`] by [`FromStr`]
+/// implementation of this structure.
+///
+/// [`Digest`] can be used for password verification with a
+/// [`argon2::verify_digest`] function.
+///
+/// [Argon2]: https://en.wikipedia.org/wiki/Argon2
+/// [`argon2::verify_digest`]: crate::verify_digest
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Decoded {
-    /// The variant.
+pub struct Digest {
+    /// The variant of [Argon2] being used.
+    ///
+    /// [Argon2]: https://en.wikipedia.org/wiki/Argon2
     pub variant: Variant,
 
-    /// The version.
+    /// The version of [Argon2] being used.
+    ///
+    /// [Argon2]: https://en.wikipedia.org/wiki/Argon2
     pub version: Version,
 
     /// The amount of memory requested (KiB).
     pub mem_cost: u32,
 
-    /// The number of passes.
+    /// The number of iterations (or passes) over the memory.
     pub time_cost: u32,
 
-    /// The parallelism.
+    /// The number of threads (or lanes) used by the algorithm.
     pub parallelism: u32,
 
     /// The salt.
@@ -81,7 +95,23 @@ pub struct Decoded {
     pub hash: Vec<u8>,
 }
 
-impl FromStr for Decoded {
+impl fmt::Display for Digest {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "${}$v={}$m={},t={},p={}${}${}",
+            self.variant,
+            self.version,
+            self.mem_cost,
+            self.time_cost,
+            self.parallelism,
+            base64::encode_config(&self.salt, base64::STANDARD_NO_PAD),
+            base64::encode_config(&self.hash, base64::STANDARD_NO_PAD),
+        )
+    }
+}
+
+impl FromStr for Digest {
     type Err = Error;
 
     /// Attempts to decode the encoded string slice.
@@ -92,7 +122,7 @@ impl FromStr for Decoded {
         }
         if items.len() == 6 {
             let options = Options::from_str(items[3])?;
-            Ok(Decoded {
+            Ok(Digest {
                 variant: items[1].parse()?,
                 version: decode_option(items[2], "v")?,
                 mem_cost: options.mem_cost,
@@ -103,7 +133,7 @@ impl FromStr for Decoded {
             })
         } else if items.len() == 5 {
             let options = Options::from_str(items[2])?;
-            Ok(Decoded {
+            Ok(Digest {
                 variant: items[1].parse()?,
                 version: Version::Version10,
                 mem_cost: options.mem_cost,
@@ -126,7 +156,7 @@ mod tests {
     fn decode_string_with_version10_returns_correct_result() {
         let encoded = "$argon2i$v=16$m=4096,t=3,p=1\
                        $c2FsdDEyMzQ=$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=";
-        let expected = Decoded {
+        let expected = Digest {
             variant: Variant::Argon2i,
             version: Version::Version10,
             mem_cost: 4096,
@@ -135,7 +165,7 @@ mod tests {
             salt: b"salt1234".to_vec(),
             hash: b"12345678901234567890123456789012".to_vec(),
         };
-        let actual = Decoded::from_str(encoded).unwrap();
+        let actual = Digest::from_str(encoded).unwrap();
         assert_eq!(actual, expected);
     }
 
@@ -143,7 +173,7 @@ mod tests {
     fn decode_string_with_version13_returns_correct_result() {
         let encoded = "$argon2i$v=19$m=4096,t=3,p=1\
                        $c2FsdDEyMzQ=$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=";
-        let expected = Decoded {
+        let expected = Digest {
             variant: Variant::Argon2i,
             version: Version::Version13,
             mem_cost: 4096,
@@ -152,7 +182,7 @@ mod tests {
             salt: b"salt1234".to_vec(),
             hash: b"12345678901234567890123456789012".to_vec(),
         };
-        let actual = Decoded::from_str(encoded).unwrap();
+        let actual = Digest::from_str(encoded).unwrap();
         assert_eq!(actual, expected);
     }
 
@@ -160,7 +190,7 @@ mod tests {
     fn decode_string_without_version_returns_correct_result() {
         let encoded = "$argon2i$m=4096,t=3,p=1\
                        $c2FsdDEyMzQ=$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=";
-        let expected = Decoded {
+        let expected = Digest {
             variant: Variant::Argon2i,
             version: Version::Version10,
             mem_cost: 4096,
@@ -169,7 +199,7 @@ mod tests {
             salt: b"salt1234".to_vec(),
             hash: b"12345678901234567890123456789012".to_vec(),
         };
-        let actual = Decoded::from_str(encoded).unwrap();
+        let actual = Digest::from_str(encoded).unwrap();
         assert_eq!(actual, expected);
     }
 
@@ -177,7 +207,7 @@ mod tests {
     fn decode_string_without_variant_returns_error_result() {
         let encoded = "$m=4096,t=3,p=1\
                        $c2FsdDEyMzQ=$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=";
-        let result = Decoded::from_str(encoded);
+        let result = Digest::from_str(encoded);
         assert_eq!(result, Err(Error::DecodingFail));
     }
 
@@ -185,7 +215,7 @@ mod tests {
     fn decode_string_with_empty_variant_returns_error_result() {
         let encoded = "$$m=4096,t=3,p=1\
                        $c2FsdDEyMzQ=$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=";
-        let result = Decoded::from_str(encoded);
+        let result = Digest::from_str(encoded);
         assert_eq!(result, Err(Error::DecodingFail));
     }
 
@@ -193,7 +223,7 @@ mod tests {
     fn decode_string_with_invalid_variant_returns_error_result() {
         let encoded = "$argon$m=4096,t=3,p=1\
                        $c2FsdDEyMzQ=$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=";
-        let result = Decoded::from_str(encoded);
+        let result = Digest::from_str(encoded);
         assert_eq!(result, Err(Error::DecodingFail));
     }
 
@@ -201,7 +231,7 @@ mod tests {
     fn decode_string_without_mem_cost_returns_error_result() {
         let encoded = "$argon2i$t=3,p=1\
                        $c2FsdDEyMzQ=$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=";
-        let result = Decoded::from_str(encoded);
+        let result = Digest::from_str(encoded);
         assert_eq!(result, Err(Error::DecodingFail));
     }
 
@@ -209,7 +239,7 @@ mod tests {
     fn decode_string_with_empty_mem_cost_returns_error_result() {
         let encoded = "$argon2i$m=,t=3,p=1\
                        $c2FsdDEyMzQ=$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=";
-        let result = Decoded::from_str(encoded);
+        let result = Digest::from_str(encoded);
         assert_eq!(result, Err(Error::DecodingFail));
     }
 
@@ -217,7 +247,7 @@ mod tests {
     fn decode_string_with_non_numeric_mem_cost_returns_error_result() {
         let encoded = "$argon2i$m=a,t=3,p=1\
                        $c2FsdDEyMzQ=$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=";
-        let result = Decoded::from_str(encoded);
+        let result = Digest::from_str(encoded);
         assert_eq!(result, Err(Error::DecodingFail));
     }
 
@@ -225,7 +255,7 @@ mod tests {
     fn decode_string_without_time_cost_returns_error_result() {
         let encoded = "$argon2i$m=4096,p=1\
                        $c2FsdDEyMzQ=$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=";
-        let result = Decoded::from_str(encoded);
+        let result = Digest::from_str(encoded);
         assert_eq!(result, Err(Error::DecodingFail));
     }
 
@@ -233,7 +263,7 @@ mod tests {
     fn decode_string_with_empty_time_cost_returns_error_result() {
         let encoded = "$argon2i$m=4096,t=,p=1\
                        $c2FsdDEyMzQ=$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=";
-        let result = Decoded::from_str(encoded);
+        let result = Digest::from_str(encoded);
         assert_eq!(result, Err(Error::DecodingFail));
     }
 
@@ -241,7 +271,7 @@ mod tests {
     fn decode_string_with_non_numeric_time_cost_returns_error_result() {
         let encoded = "$argon2i$m=4096,t=a,p=1\
                        $c2FsdDEyMzQ=$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=";
-        let result = Decoded::from_str(encoded);
+        let result = Digest::from_str(encoded);
         assert_eq!(result, Err(Error::DecodingFail));
     }
 
@@ -249,7 +279,7 @@ mod tests {
     fn decode_string_without_parallelism_returns_error_result() {
         let encoded = "$argon2i$m=4096,t=3\
                        $c2FsdDEyMzQ=$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=";
-        let result = Decoded::from_str(encoded);
+        let result = Digest::from_str(encoded);
         assert_eq!(result, Err(Error::DecodingFail));
     }
 
@@ -257,7 +287,7 @@ mod tests {
     fn decode_string_with_empty_parallelism_returns_error_result() {
         let encoded = "$argon2i$m=4096,t=3,p=\
                        $c2FsdDEyMzQ=$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=";
-        let result = Decoded::from_str(encoded);
+        let result = Digest::from_str(encoded);
         assert_eq!(result, Err(Error::DecodingFail));
     }
 
@@ -265,7 +295,7 @@ mod tests {
     fn decode_string_with_non_numeric_parallelism_returns_error_result() {
         let encoded = "$argon2i$m=4096,t=3,p=a\
                        $c2FsdDEyMzQ=$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=";
-        let result = Decoded::from_str(encoded);
+        let result = Digest::from_str(encoded);
         assert_eq!(result, Err(Error::DecodingFail));
     }
 
@@ -273,7 +303,7 @@ mod tests {
     fn decode_string_without_salt_returns_error_result() {
         let encoded = "$argon2i$m=4096,t=3,p=1\
                        $MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=";
-        let result = Decoded::from_str(encoded);
+        let result = Digest::from_str(encoded);
         assert_eq!(result, Err(Error::DecodingFail));
     }
 
@@ -281,7 +311,7 @@ mod tests {
     fn decode_string_without_hash_returns_error_result() {
         let encoded = "$argon2i$m=4096,t=3,p=a\
                        $c2FsdDEyMzQ=";
-        let result = Decoded::from_str(encoded);
+        let result = Digest::from_str(encoded);
         assert_eq!(result, Err(Error::DecodingFail));
     }
 
@@ -289,7 +319,7 @@ mod tests {
     fn decode_string_with_empty_hash_returns_error_result() {
         let encoded = "$argon2i$m=4096,t=3,p=a\
                        $c2FsdDEyMzQ=$";
-        let result = Decoded::from_str(encoded);
+        let result = Digest::from_str(encoded);
         assert_eq!(result, Err(Error::DecodingFail));
     }
 }
