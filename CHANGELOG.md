@@ -5,6 +5,13 @@ This documents all notable changes to
 [rust-argon2](https://github.com/sru-systems/rust-argon2).
 
 
+## 1.0.0
+
+- Update constant_time_eq to 0.1.5.
+- Update serde to 1.0.133.
+- Update blake2b_simd to 1.0.
+
+
 ## 0.8.3
 
 - Replace transmute with to_le_bytes.
