@@ -7,6 +7,7 @@ This documents all notable changes to
 
 ## 1.0.0
 
+- Remove deprecated functions.
 - Update constant_time_eq to 0.1.5.
 - Update serde to 1.0.133.
 - Update blake2b_simd to 1.0.
