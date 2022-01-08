@@ -6,9 +6,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use std::{fmt, str::FromStr};
+
 use crate::error::Error;
 use crate::result::Result;
-use std::fmt;
 
 /// The Argon2 version.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, PartialOrd, Ord)]
@@ -26,21 +27,25 @@ impl Version {
         *self as u32
     }
 
-    /// Attempts to create a version from a string slice.
-    pub fn from_str(str: &str) -> Result<Version> {
-        match str {
-            "16" => Ok(Version::Version10),
-            "19" => Ok(Version::Version13),
-            _ => Err(Error::DecodingFail),
-        }
-    }
-
     /// Attempts to create a version from an u32.
     pub fn from_u32(val: u32) -> Result<Version> {
         match val {
             0x10 => Ok(Version::Version10),
             0x13 => Ok(Version::Version13),
             _ => Err(Error::IncorrectVersion),
+        }
+    }
+}
+
+impl FromStr for Version {
+    type Err = Error;
+
+    /// Attempts to create a version from a string slice.
+    fn from_str(str: &str) -> Result<Self> {
+        match str {
+            "16" => Ok(Version::Version10),
+            "19" => Ok(Version::Version13),
+            _ => Err(Error::DecodingFail),
         }
     }
 }
@@ -59,6 +64,8 @@ impl fmt::Display for Version {
 
 #[cfg(test)]
 mod tests {
+
+    use std::str::FromStr;
 
     use crate::error::Error;
     use crate::version::Version;

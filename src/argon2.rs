@@ -9,6 +9,7 @@
 use crate::config::Config;
 use crate::context::Context;
 use crate::core;
+use crate::digest::Digest;
 use crate::encoding;
 use crate::memory::Memory;
 use crate::result::Result;
@@ -179,7 +180,44 @@ pub fn verify_encoded(encoded: &str, pwd: &[u8]) -> Result<bool> {
 /// assert!(res);
 /// ```
 pub fn verify_encoded_ext(encoded: &str, pwd: &[u8], secret: &[u8], ad: &[u8]) -> Result<bool> {
-    let decoded = encoding::decode_string(encoded)?;
+    verify_digest_ext(&encoded.parse()?, pwd, secret, ad)
+}
+
+/// Verifies the password with the [`Digest`].
+///
+/// # Example
+///
+/// ```
+/// use argon2::Digest;
+///
+/// let enc = "$argon2i$v=19$m=4096,t=3,p=1$c29tZXNhbHQ\
+///            $iWh06vD8Fy27wf9npn6FXWiCX4K6pW6Ue1Bnzz07Z8A";
+///
+/// let matches = argon2::verify_digest(&enc.parse().unwrap(), b"password").unwrap();
+/// assert!(matches);
+/// ```
+pub fn verify_digest(decoded: &Digest, pwd: &[u8]) -> Result<bool> {
+    verify_digest_ext(&decoded, pwd, &[], &[])
+}
+
+/// Verifies the password with the [`Digest`], secret and associated data.
+///
+/// # Example
+///
+/// ```
+/// use argon2::Digest;
+///
+/// let enc = "$argon2i$v=19$m=4096,t=3,p=1$c29tZXNhbHQ\
+///            $OlcSvlN20Lz43sK3jhCJ9K04oejhiY0AmI+ck6nuETo";
+///
+/// let pwd = b"password";
+/// let secret = b"secret";
+/// let ad = b"ad";
+///
+/// let matches = argon2::verify_digest_ext(&enc.parse().unwrap(), pwd, secret, ad).unwrap();
+/// assert!(matches)
+/// ```
+pub fn verify_digest_ext(decoded: &Digest, pwd: &[u8], secret: &[u8], ad: &[u8]) -> Result<bool> {
     let threads = if cfg!(feature = "crossbeam-utils") { decoded.parallelism } else { 1 };
     let config = Config {
         variant: decoded.variant,

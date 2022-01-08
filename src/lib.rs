@@ -89,7 +89,7 @@ mod common;
 mod config;
 mod context;
 mod core;
-mod decoded;
+mod digest;
 mod encoding;
 mod error;
 mod memory;
@@ -100,6 +100,7 @@ mod version;
 
 pub use crate::argon2::*;
 pub use crate::config::Config;
+pub use crate::digest::Digest;
 pub use crate::error::Error;
 pub use crate::result::Result;
 pub use crate::thread_mode::ThreadMode;
