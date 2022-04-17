@@ -5,6 +5,10 @@ Rust library for hashing passwords using
 function that won the
 [Password Hashing Competition (PHC)](https://password-hashing.net).
 
+## Security
+
+This crate has not been audited by a security professional and has a history of [unresolved](https://github.com/sru-systems/rust-argon2/issues/41) security issues. The major alternative to this crate is the RustCrypto organisations's [argon2](https://docs.rs/argon2/latest/argon2/) crate.
+
 ## Usage
 
 To use `rust-argon2`, add the following to your Cargo.toml:
@@ -67,10 +71,6 @@ It does not attempt to clear potentially sensitive data from its work
 memory. To do so correctly without a heavy performance penalty would
 require help from the compiler. It's better to not attempt to do so than to
 present a false assurance.
-
-This version uses the standard implementation and does not yet implement
-optimizations. Therefore, it is not the fastest implementation available.
-
 
 ## License
 
