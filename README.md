@@ -11,7 +11,7 @@ To use `rust-argon2`, add the following to your Cargo.toml:
 
 ```toml
 [dependencies]
-rust-argon2 = "1.0"
+rust-argon2 = "1.0.0"
 ```
 
 And the following to your crate root:
