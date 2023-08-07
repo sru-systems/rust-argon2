@@ -12,7 +12,7 @@ use crate::error::Error;
 use crate::result::Result;
 use crate::variant::Variant;
 use crate::version::Version;
-use base64;
+use base64::{engine::general_purpose, Engine as _};
 
 /// Structure containing the options.
 struct Options {
@@ -39,8 +39,8 @@ pub fn decode_string(encoded: &str) -> Result<Decoded> {
         let variant = decode_variant(items[1])?;
         let version = decode_version(items[2])?;
         let options = decode_options(items[3])?;
-        let salt = base64::decode(items[4])?;
-        let hash = base64::decode(items[5])?;
+        let salt = general_purpose::STANDARD_NO_PAD.decode(items[4])?;
+        let hash = general_purpose::STANDARD_NO_PAD.decode(items[5])?;
 
         Ok(Decoded {
             variant,
@@ -55,8 +55,8 @@ pub fn decode_string(encoded: &str) -> Result<Decoded> {
         decode_empty(items[0])?;
         let variant = decode_variant(items[1])?;
         let options = decode_options(items[2])?;
-        let salt = base64::decode(items[3])?;
-        let hash = base64::decode(items[4])?;
+        let salt = general_purpose::STANDARD_NO_PAD.decode(items[3])?;
+        let hash = general_purpose::STANDARD_NO_PAD.decode(items[4])?;
 
         Ok(Decoded {
             variant,
@@ -139,8 +139,8 @@ pub fn encode_string(context: &Context, hash: &[u8]) -> String {
         context.config.mem_cost,
         context.config.time_cost,
         context.config.lanes,
-        base64::encode_config(context.salt, base64::STANDARD_NO_PAD),
-        base64::encode_config(hash, base64::STANDARD_NO_PAD),
+        general_purpose::STANDARD_NO_PAD.encode(context.salt),
+        general_purpose::STANDARD_NO_PAD.encode(hash),
     )
 }
 
