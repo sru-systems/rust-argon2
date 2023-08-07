@@ -195,7 +195,7 @@ mod tests {
     #[test]
     fn decode_string_with_version10_returns_correct_result() {
         let encoded = "$argon2i$v=16$m=4096,t=3,p=1\
-                       $c2FsdDEyMzQ=$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=";
+                       $c2FsdDEyMzQ$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI";
         let expected = Decoded {
             variant: Variant::Argon2i,
             version: Version::Version10,
@@ -212,7 +212,7 @@ mod tests {
     #[test]
     fn decode_string_with_version13_returns_correct_result() {
         let encoded = "$argon2i$v=19$m=4096,t=3,p=1\
-                       $c2FsdDEyMzQ=$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=";
+                       $c2FsdDEyMzQ$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI";
         let expected = Decoded {
             variant: Variant::Argon2i,
             version: Version::Version13,
@@ -229,7 +229,7 @@ mod tests {
     #[test]
     fn decode_string_without_version_returns_correct_result() {
         let encoded = "$argon2i$m=4096,t=3,p=1\
-                       $c2FsdDEyMzQ=$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=";
+                       $c2FsdDEyMzQ$MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI";
         let expected = Decoded {
             variant: Variant::Argon2i,
             version: Version::Version10,
