@@ -2,7 +2,7 @@
 name = "rust-argon2"
 version = "1.0.0"
 authors = ["Martijn Rijkeboer <mrr@sru-systems.com>"]
-edition = "2018"
+edition = "2021"
 license = "MIT/Apache-2.0"
 description = "Rust implementation of the Argon2 password hashing function."
 documentation = "https://docs.sru-systems.com/rust-argon2/1.0.0/argon2/"
