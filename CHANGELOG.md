@@ -5,6 +5,15 @@ This documents all notable changes to
 [rust-argon2](https://github.com/sru-systems/rust-argon2).
 
 
+## 1.0.1
+
+- Update serde dependency to 1.0.
+- Update constant_time_eq dependency to 0.3.0.
+- Update base64 dependency to 0.21.
+- Encoded strings must not use padding, fix tests.
+- Update to Rust edition 2021.
+
+
 ## 1.0.0
 
 - Remove deprecated functions.

@@ -1,6 +1,6 @@
 [package]
 name = "rust-argon2"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Martijn Rijkeboer <mrr@sru-systems.com>"]
 edition = "2021"
 license = "MIT/Apache-2.0"
