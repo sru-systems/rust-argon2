@@ -145,7 +145,6 @@ pub fn hash_raw(pwd: &[u8], salt: &[u8], config: &Config) -> Result<Vec<u8>> {
     Ok(hash)
 }
 
-
 /// Verifies the password with the encoded hash.
 ///
 /// # Examples
@@ -180,7 +179,11 @@ pub fn verify_encoded(encoded: &str, pwd: &[u8]) -> Result<bool> {
 /// ```
 pub fn verify_encoded_ext(encoded: &str, pwd: &[u8], secret: &[u8], ad: &[u8]) -> Result<bool> {
     let decoded = encoding::decode_string(encoded)?;
-    let threads = if cfg!(feature = "crossbeam-utils") { decoded.parallelism } else { 1 };
+    let threads = if cfg!(feature = "crossbeam-utils") {
+        decoded.parallelism
+    } else {
+        1
+    };
     let config = Config {
         variant: decoded.variant,
         version: decoded.version,
