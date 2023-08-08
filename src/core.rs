@@ -280,7 +280,7 @@ fn fill_segment(context: &Context, position: &Position, memory: &mut Memory) {
             }
             pseudo_rand = address_block[(i % common::ADDRESSES_IN_BLOCK) as usize];
         } else {
-            pseudo_rand = memory[(prev_offset)][0];
+            pseudo_rand = memory[prev_offset][0];
         }
 
         // 1.2.2 Computing the lane of the reference block
