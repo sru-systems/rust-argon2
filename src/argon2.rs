@@ -183,10 +183,10 @@ pub fn verify_encoded_ext(encoded: &str, pwd: &[u8], secret: &[u8], ad: &[u8]) -
 ///
 /// let pwd = b"password";
 /// let salt = b"somesalt";
-/// let hash = &[137, 104, 116, 234, 240, 252, 23, 45, 187, 193, 255, 103, 166,
-///              126, 133, 93, 104, 130, 95, 130, 186, 165, 110, 148, 123, 80,
-///              103, 207, 61, 59, 103, 192];
-/// let config = Config::default();
+/// let hash = &[158, 135, 137, 200, 180, 40, 52, 34, 10, 252, 0, 8, 90, 199,
+///              58, 204, 48, 134, 81, 33, 105, 148, 171, 191, 221, 214, 155,
+///              37, 146, 3, 46, 253];
+/// let config = Config::rfc9106_low_mem();
 /// let res = argon2::verify_raw(pwd, salt, hash, &config).unwrap();
 /// assert!(res);
 /// ```

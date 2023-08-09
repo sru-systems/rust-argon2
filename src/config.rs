@@ -6,7 +6,6 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use crate::common;
 use crate::variant::Variant;
 use crate::version::Version;
 
@@ -21,10 +20,10 @@ use crate::version::Version;
 /// assert_eq!(config.ad, &[]);
 /// assert_eq!(config.hash_length, 32);
 /// assert_eq!(config.lanes, 1);
-/// assert_eq!(config.mem_cost, 4096);
+/// assert_eq!(config.mem_cost, 2 * 1024 * 1024);
 /// assert_eq!(config.secret, &[]);
-/// assert_eq!(config.time_cost, 3);
-/// assert_eq!(config.variant, Variant::Argon2i);
+/// assert_eq!(config.time_cost, 1);
+/// assert_eq!(config.variant, Variant::Argon2id);
 /// assert_eq!(config.version, Version::Version13);
 /// ```
 #[derive(Clone, Debug, PartialEq)]
@@ -55,18 +54,31 @@ pub struct Config<'a> {
 }
 
 impl<'a> Config<'a> {
+    /// Default configuration used by the original C implementation.
+    pub fn original() -> Config<'a> {
+        Config {
+            ad: &[],
+            hash_length: 32,
+            lanes: 1,
+            mem_cost: 4096,
+            secret: &[],
+            time_cost: 3,
+            variant: Variant::Argon2i,
+            version: Version::Version13,
+        }
+    }
 
     /// RFC9106 recommended configuration with t=1 and 2 GiB memory.
     pub fn rfc9106() -> Config<'a> {
         Config {
             ad: &[],
-            hash_length: common::DEF_HASH_LENGTH,
-            lanes: common::DEF_LANES,
+            hash_length: 32,
+            lanes: 1,
             mem_cost: 2097152,
             secret: &[],
             time_cost: 1,
             variant: Variant::Argon2id,
-            version: Version::default(),
+            version: Version::Version13,
         }
     }
 
@@ -74,29 +86,21 @@ impl<'a> Config<'a> {
     pub fn rfc9106_low_mem() -> Config<'a> {
         Config {
             ad: &[],
-            hash_length: common::DEF_HASH_LENGTH,
-            lanes: common::DEF_LANES,
+            hash_length: 32,
+            lanes: 1,
             mem_cost: 65536,
             secret: &[],
             time_cost: 3,
             variant: Variant::Argon2id,
-            version: Version::default(),
+            version: Version::Version13,
         }
     }
 }
 
 impl<'a> Default for Config<'a> {
+    /// RFC9106 recommended configuration with t=1 and 2 GiB memory.
     fn default() -> Config<'a> {
-        Config {
-            ad: &[],
-            hash_length: common::DEF_HASH_LENGTH,
-            lanes: common::DEF_LANES,
-            mem_cost: common::DEF_MEMORY,
-            secret: &[],
-            time_cost: common::DEF_TIME,
-            variant: Variant::default(),
-            version: Version::default(),
-        }
+        Config::rfc9106()
     }
 }
 
@@ -110,6 +114,19 @@ mod tests {
     #[test]
     fn default_returns_correct_instance() {
         let config = Config::default();
+        assert_eq!(config.ad, &[]);
+        assert_eq!(config.hash_length, 32);
+        assert_eq!(config.lanes, 1);
+        assert_eq!(config.mem_cost, 2 * 1024 * 1024);
+        assert_eq!(config.secret, &[]);
+        assert_eq!(config.time_cost, 1);
+        assert_eq!(config.variant, Variant::Argon2id);
+        assert_eq!(config.version, Version::Version13);
+    }
+
+    #[test]
+    fn original_returns_correct_instance() {
+        let config = Config::original();
         assert_eq!(config.ad, &[]);
         assert_eq!(config.hash_length, 32);
         assert_eq!(config.lanes, 1);

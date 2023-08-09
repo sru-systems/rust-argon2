@@ -6,9 +6,6 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-/// Default number of lanes (degree of parallelism).
-pub const DEF_LANES: u32 = 1;
-
 /// Minimum number of lanes (degree of parallelism).
 pub const MIN_LANES: u32 = 1;
 
@@ -18,17 +15,11 @@ pub const MAX_LANES: u32 = 0x00FF_FFFF;
 /// Number of synchronization points between lanes per pass.
 pub const SYNC_POINTS: u32 = 4;
 
-/// Default digest size in bytes.
-pub const DEF_HASH_LENGTH: u32 = 32;
-
 /// Minimum digest size in bytes.
 pub const MIN_HASH_LENGTH: u32 = 4;
 
 /// Maximum digest size in bytes.
 pub const MAX_HASH_LENGTH: u32 = 0xFFFF_FFFF;
-
-/// Default number of memory blocks (2^12).
-pub const DEF_MEMORY: u32 = 4096;
 
 /// Minimum number of memory blocks (each of BLOCK_SIZE bytes).
 pub const MIN_MEMORY: u32 = 2 * SYNC_POINTS;
@@ -38,9 +29,6 @@ pub const MIN_MEMORY: u32 = 2 * SYNC_POINTS;
 pub const MAX_MEMORY: u32 = 0x200000;
 #[cfg(target_pointer_width = "64")]
 pub const MAX_MEMORY: u32 = 0xFFFF_FFFF;
-
-/// Default number of passes.
-pub const DEF_TIME: u32 = 3;
 
 /// Minimum number of passes
 pub const MIN_TIME: u32 = 1;
