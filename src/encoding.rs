@@ -365,7 +365,6 @@ mod tests {
             lanes: 1,
             mem_cost: 4096,
             secret: &[],
-            thread_mode: ThreadMode::Parallel,
             time_cost: 3,
             variant: Variant::Argon2i,
             version: Version::Version13,

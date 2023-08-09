@@ -39,7 +39,7 @@ assert!(matches);
 Create a password hash with custom settings and verify it:
 
 ```rust
-use argon2::{self, Config, ThreadMode, Variant, Version};
+use argon2::{self, Config, Variant, Version};
 
 let password = b"password";
 let salt = b"othersalt";
@@ -49,7 +49,6 @@ let config = Config {
     mem_cost: 65536,
     time_cost: 10,
     lanes: 4,
-    thread_mode: ThreadMode::Parallel,
     secret: &[],
     ad: &[],
     hash_length: 32
