@@ -158,17 +158,9 @@ pub fn num_len(number: u32) -> u32 {
 #[cfg(test)]
 mod tests {
 
-    #[cfg(feature = "crossbeam-utils")]
-    use crate::config::Config;
-    #[cfg(feature = "crossbeam-utils")]
-    use crate::context::Context;
     use crate::decoded::Decoded;
-    #[cfg(feature = "crossbeam-utils")]
-    use crate::encoding::encode_string;
     use crate::encoding::{base64_len, decode_string, num_len};
     use crate::error::Error;
-    #[cfg(feature = "crossbeam-utils")]
-    use crate::thread_mode::ThreadMode;
     use crate::variant::Variant;
     use crate::version::Version;
 

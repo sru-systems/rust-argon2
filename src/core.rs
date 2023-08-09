@@ -13,8 +13,6 @@ use crate::memory::Memory;
 use crate::variant::Variant;
 use crate::version::Version;
 use blake2b_simd::Params;
-#[cfg(feature = "crossbeam-utils")]
-use crossbeam_utils::thread::scope;
 
 /// Position of the block currently being operated on.
 #[derive(Clone, Debug)]
@@ -32,11 +30,7 @@ pub fn initialize(context: &Context, memory: &mut Memory) {
 
 /// Fills all the memory blocks.
 pub fn fill_memory_blocks(context: &Context, memory: &mut Memory) {
-    if context.config.uses_sequential() {
-        fill_memory_blocks_st(context, memory);
-    } else {
-        fill_memory_blocks_mt(context, memory);
-    }
+    fill_memory_blocks_st(context, memory);
 }
 
 /// Calculates the final hash and returns it.
@@ -181,32 +175,6 @@ fn fill_first_blocks(context: &Context, memory: &mut Memory, h0: &mut [u8]) {
         h0[start..(start + 4)].clone_from_slice(&u32::to_le_bytes(1));
         hprime(memory[(lane, 1)].as_u8_mut(), &h0);
     }
-}
-
-#[cfg(feature = "crossbeam-utils")]
-fn fill_memory_blocks_mt(context: &Context, memory: &mut Memory) {
-    for p in 0..context.config.time_cost {
-        for s in 0..common::SYNC_POINTS {
-            let _ = scope(|scoped| {
-                for (l, mem) in (0..context.config.lanes).zip(memory.as_lanes_mut()) {
-                    let position = Position {
-                        pass: p,
-                        lane: l,
-                        slice: s,
-                        index: 0,
-                    };
-                    scoped.spawn(move |_| {
-                        fill_segment(context, &position, mem);
-                    });
-                }
-            });
-        }
-    }
-}
-
-#[cfg(not(feature = "crossbeam-utils"))]
-fn fill_memory_blocks_mt(_: &Context, _: &mut Memory) {
-    unimplemented!()
 }
 
 fn fill_memory_blocks_st(context: &Context, memory: &mut Memory) {
