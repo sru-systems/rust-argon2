@@ -5,6 +5,13 @@ This documents all notable changes to
 [rust-argon2](https://github.com/sru-systems/rust-argon2).
 
 
+## 2.0.0
+
+- Remove parallel execution to prevent UB.
+- Add config settings from RFC9106.
+- Use RFC9106 recommended settings as default.
+
+
 ## 1.0.1
 
 - Update serde dependency to 1.0.
