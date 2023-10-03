@@ -68,6 +68,76 @@ impl<'a> Config<'a> {
         }
     }
 
+    /// OWASP recommended configuration with t=1 and 46 MiB memory.
+    pub fn owasp1() -> Config<'a> {
+        Config {
+            ad: &[],
+            hash_length: 32,
+            lanes: 1,
+            mem_cost: 47104,
+            secret: &[],
+            time_cost: 1,
+            variant: Variant::Argon2id,
+            version: Version::Version13,
+        }
+    }
+
+    /// OWASP recommended configuration with t=2 and 19 MiB memory.
+    pub fn owasp2() -> Config<'a> {
+        Config {
+            ad: &[],
+            hash_length: 32,
+            lanes: 1,
+            mem_cost: 19456,
+            secret: &[],
+            time_cost: 2,
+            variant: Variant::Argon2id,
+            version: Version::Version13,
+        }
+    }
+
+    /// OWASP recommended configuration with t=3 and 12 MiB memory.
+    pub fn owasp3() -> Config<'a> {
+        Config {
+            ad: &[],
+            hash_length: 32,
+            lanes: 1,
+            mem_cost: 12288,
+            secret: &[],
+            time_cost: 3,
+            variant: Variant::Argon2id,
+            version: Version::Version13,
+        }
+    }
+
+    /// OWASP recommended configuration with t=4 and 9 MiB memory.
+    pub fn owasp4() -> Config<'a> {
+        Config {
+            ad: &[],
+            hash_length: 32,
+            lanes: 1,
+            mem_cost: 9216,
+            secret: &[],
+            time_cost: 4,
+            variant: Variant::Argon2id,
+            version: Version::Version13,
+        }
+    }
+
+    /// OWASP recommended configuration with t=5 and 7 MiB memory.
+    pub fn owasp5() -> Config<'a> {
+        Config {
+            ad: &[],
+            hash_length: 32,
+            lanes: 1,
+            mem_cost: 7168,
+            secret: &[],
+            time_cost: 5,
+            variant: Variant::Argon2id,
+            version: Version::Version13,
+        }
+    }
+
     /// RFC9106 recommended configuration with t=1 and 2 GiB memory.
     pub fn rfc9106() -> Config<'a> {
         Config {
@@ -134,6 +204,71 @@ mod tests {
         assert_eq!(config.secret, &[]);
         assert_eq!(config.time_cost, 3);
         assert_eq!(config.variant, Variant::Argon2i);
+        assert_eq!(config.version, Version::Version13);
+    }
+
+    #[test]
+    fn owasp1_returns_correct_instance() {
+        let config = Config::owasp1();
+        assert_eq!(config.ad, &[]);
+        assert_eq!(config.hash_length, 32);
+        assert_eq!(config.lanes, 1);
+        assert_eq!(config.mem_cost, 46 * 1024);
+        assert_eq!(config.secret, &[]);
+        assert_eq!(config.time_cost, 1);
+        assert_eq!(config.variant, Variant::Argon2id);
+        assert_eq!(config.version, Version::Version13);
+    }
+
+    #[test]
+    fn owasp2_returns_correct_instance() {
+        let config = Config::owasp2();
+        assert_eq!(config.ad, &[]);
+        assert_eq!(config.hash_length, 32);
+        assert_eq!(config.lanes, 1);
+        assert_eq!(config.mem_cost, 19 * 1024);
+        assert_eq!(config.secret, &[]);
+        assert_eq!(config.time_cost, 2);
+        assert_eq!(config.variant, Variant::Argon2id);
+        assert_eq!(config.version, Version::Version13);
+    }
+
+    #[test]
+    fn owasp3_returns_correct_instance() {
+        let config = Config::owasp3();
+        assert_eq!(config.ad, &[]);
+        assert_eq!(config.hash_length, 32);
+        assert_eq!(config.lanes, 1);
+        assert_eq!(config.mem_cost, 12 * 1024);
+        assert_eq!(config.secret, &[]);
+        assert_eq!(config.time_cost, 3);
+        assert_eq!(config.variant, Variant::Argon2id);
+        assert_eq!(config.version, Version::Version13);
+    }
+
+    #[test]
+    fn owasp4_returns_correct_instance() {
+        let config = Config::owasp4();
+        assert_eq!(config.ad, &[]);
+        assert_eq!(config.hash_length, 32);
+        assert_eq!(config.lanes, 1);
+        assert_eq!(config.mem_cost, 9 * 1024);
+        assert_eq!(config.secret, &[]);
+        assert_eq!(config.time_cost, 4);
+        assert_eq!(config.variant, Variant::Argon2id);
+        assert_eq!(config.version, Version::Version13);
+    }
+
+    #[test]
+    fn owasp5_returns_correct_instance() {
+        let config = Config::owasp5();
+        assert_eq!(config.ad, &[]);
+        assert_eq!(config.hash_length, 32);
+        assert_eq!(config.lanes, 1);
+        assert_eq!(config.mem_cost, 7 * 1024);
+        assert_eq!(config.secret, &[]);
+        assert_eq!(config.time_cost, 5);
+        assert_eq!(config.variant, Variant::Argon2id);
         assert_eq!(config.version, Version::Version13);
     }
 
