@@ -4,6 +4,12 @@ ChangeLog for rust-argon2
 This documents all notable changes to
 [rust-argon2](https://github.com/sru-systems/rust-argon2).
 
+## 2.1.0
+
+- Add OWASP recommended configurations.
+- Change default configuration from RFC9106 to OWASP (t=2, 19 MiB memory). For
+  the 2.0.0 default configuration use `Config::rfc9106`. For the 1.0.x default
+  configuration use `Config::original`.
 
 ## 2.0.0
 
