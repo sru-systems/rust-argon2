@@ -20,9 +20,9 @@ use crate::version::Version;
 /// assert_eq!(config.ad, &[]);
 /// assert_eq!(config.hash_length, 32);
 /// assert_eq!(config.lanes, 1);
-/// assert_eq!(config.mem_cost, 2 * 1024 * 1024);
+/// assert_eq!(config.mem_cost, 19 * 1024);
 /// assert_eq!(config.secret, &[]);
-/// assert_eq!(config.time_cost, 1);
+/// assert_eq!(config.time_cost, 2);
 /// assert_eq!(config.variant, Variant::Argon2id);
 /// assert_eq!(config.version, Version::Version13);
 /// ```
@@ -168,9 +168,9 @@ impl<'a> Config<'a> {
 }
 
 impl<'a> Default for Config<'a> {
-    /// RFC9106 recommended configuration with t=1 and 2 GiB memory.
+    /// OWASP recommended configuration with t=2 and 19 MiB memory.
     fn default() -> Config<'a> {
-        Config::rfc9106()
+        Config::owasp2()
     }
 }
 
@@ -187,9 +187,9 @@ mod tests {
         assert_eq!(config.ad, &[]);
         assert_eq!(config.hash_length, 32);
         assert_eq!(config.lanes, 1);
-        assert_eq!(config.mem_cost, 2 * 1024 * 1024);
+        assert_eq!(config.mem_cost, 19 * 1024);
         assert_eq!(config.secret, &[]);
-        assert_eq!(config.time_cost, 1);
+        assert_eq!(config.time_cost, 2);
         assert_eq!(config.variant, Variant::Argon2id);
         assert_eq!(config.version, Version::Version13);
     }
