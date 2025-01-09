@@ -9,7 +9,6 @@
 #![warn(unsafe_op_in_unsafe_fn)]
 
 use crate::block::Block;
-use std::cell::UnsafeCell;
 use std::fmt;
 use std::fmt::Debug;
 use std::marker::PhantomData;
@@ -39,10 +38,10 @@ impl Memory {
 
     /// Return a wrapped pointer to the flat array of blocks for parallel disjoint access.
     #[cfg(feature = "crossbeam-utils")]
-    pub fn as_unsafe_blocks(&mut self) -> UnsafeBlocks {
+    pub fn as_unsafe_blocks(&mut self) -> UnsafeBlocks<'_> {
         UnsafeBlocks {
-            inner: UnsafeCell::new(&mut *self.blocks),
-            lifetime: PhantomData,
+            ptr: &mut *self.blocks,
+            phantom: PhantomData,
         }
     }
 }
@@ -51,8 +50,8 @@ impl Memory {
 ///
 /// All operations are unchecked and require `unsafe`.
 pub struct UnsafeBlocks<'a> {
-    inner: UnsafeCell<*mut [Block]>,
-    lifetime: PhantomData<&'a mut [Block]>,
+    ptr: *mut [Block],
+    phantom: PhantomData<&'a [Block]>,
 }
 
 impl UnsafeBlocks<'_> {
@@ -65,8 +64,7 @@ impl UnsafeBlocks<'_> {
     /// lives.
     #[cfg(feature = "crossbeam-utils")]
     pub unsafe fn get_unchecked(&self, index: usize) -> &Block {
-        // SAFETY: by construction, the pointer to the slice of blocks is dereferenceable.
-        let first_block: *const Block = unsafe { *self.inner.get() } as _;
+        let first_block: *const Block = self.ptr as _;
         // SAFETY: the caller promises that the `index` is in bounds; therefore, we're within
         // the bounds of the allocated object, and the offset in bytes fits in an `isize`.
         let ptr = unsafe { first_block.add(index) };
@@ -81,10 +79,9 @@ impl UnsafeBlocks<'_> {
     ///
     /// The caller must ensure that `index` is in bounds, no other references exist or are created
     /// to the corresponding block, and no data races happen while the returned reference lives.
-    #[allow(clippy::mut_from_ref)] // TODO: check that this really is a false positive (Mutex?)
+    #[allow(clippy::mut_from_ref)]
     pub unsafe fn get_mut_unchecked(&self, index: usize) -> &mut Block {
-        // SAFETY: by construction, the pointer to the slice of blocks is dereferenceable.
-        let first_block: *mut Block = unsafe { *self.inner.get() } as _;
+        let first_block: *mut Block = self.ptr as _;
         // SAFETY: the caller promises that the `index` is in bounds; therefore, we're within
         // the bounds of the allocated object, and the offset in bytes fits in an `isize`.
         let ptr = unsafe { first_block.add(index) };
