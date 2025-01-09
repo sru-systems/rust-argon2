@@ -213,6 +213,12 @@ mod tests {
 
     #[test]
     fn single_thread_verification_multi_lane_hash() {
+        /*
+        let hash = hash_encoded(b"foo", b"abcdefghijklmnopqrstuvwxyz", &Config {
+            lanes: 4, thread_mode: ThreadMode::Parallel,
+            ..Config::default()
+        });
+        */
         let hash = "$argon2i$v=19$m=4096,t=3,p=4$YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo$BvBk2OaSofBHfbrUW61nHrWB/43xgfs/QJJ5DkMAd8I";
         verify_encoded(hash, b"foo").unwrap();
     }
