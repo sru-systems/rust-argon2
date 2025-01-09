@@ -6,10 +6,13 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#![warn(unsafe_op_in_unsafe_fn)]
+
 use crate::block::Block;
 use std::cell::UnsafeCell;
 use std::fmt;
 use std::fmt::Debug;
+use std::marker::PhantomData;
 use std::ops::{Index, IndexMut};
 
 /// Structure representing the memory matrix.
@@ -34,51 +37,68 @@ impl Memory {
         Memory { rows, cols, blocks }
     }
 
+    /// Return a wrapped pointer to the flat array of blocks for parallel disjoint access.
     #[cfg(feature = "crossbeam-utils")]
-    /// Gets the mutable lanes representation of the memory matrix.
-    pub fn as_lanes_mut(&mut self) -> Vec<&mut Memory> {
-        let ptr: *mut Memory = self;
-        let mut vec = Vec::with_capacity(self.rows);
-        for _ in 0..self.rows {
-            vec.push(unsafe { &mut (*ptr) });
+    pub fn as_unsafe_blocks(&mut self) -> UnsafeBlocks {
+        UnsafeBlocks {
+            inner: UnsafeCell::new(&mut *self.blocks),
+            lifetime: PhantomData,
         }
-        vec
     }
 }
 
-pub struct UnsafeMemory {
+/// Wrapped pointer to the flat array of blocks for parallel disjoint access.
+///
+/// All operations are unchecked and require `unsafe`.
+pub struct UnsafeBlocks<'a> {
     inner: UnsafeCell<*mut [Block]>,
+    lifetime: PhantomData<&'a mut [Block]>,
 }
 
-impl UnsafeMemory {
-    pub fn new(mem: &mut Memory) -> UnsafeMemory {
-        UnsafeMemory {
-            inner: UnsafeCell::new(&mut *mem.blocks),
-        }
-    }
-
+impl UnsafeBlocks<'_> {
+    /// Get a shared reference to the `Block` at `index`.
+    ///
     /// # Safety
     ///
-    /// The caller must ensure `mem` is valid, `index` is in bounds, and that no other references
-    /// exist to the requested block.
+    /// The caller must ensure that `index` is in bounds, no mutable references exist or are
+    /// created to the corresponding block, and no data races happen while the returned reference
+    /// lives.
     #[cfg(feature = "crossbeam-utils")]
-    pub unsafe fn get_block_unsafe(&self, index: usize) -> &Block {
-        &*(*self.inner.get() as *const Block).offset(index.try_into().unwrap())
+    pub unsafe fn get_unchecked(&self, index: usize) -> &Block {
+        // SAFETY: by construction, the pointer to the slice of blocks is dereferenceable.
+        let first_block: *const Block = unsafe { *self.inner.get() } as _;
+        // SAFETY: the caller promises that the `index` is in bounds; therefore, we're within
+        // the bounds of the allocated object, and the offset in bytes fits in an `isize`.
+        let ptr = unsafe { first_block.add(index) };
+        // SAFETY: the caller promises that there are no mutable references or data races to
+        // mutate the requested `Block`.
+        unsafe { &*ptr }
     }
 
+    /// Get a mutable reference to the `Block` at `index`.
+    ///
     /// # Safety
     ///
-    /// The caller must ensure `mem` is valid, `index` is in bounds, and that no other references
-    /// exist to the block to be replaced.
-    #[cfg(feature = "crossbeam-utils")]
-    pub unsafe fn set_block_unsafe(&self, index: usize, block: Block) {
-        *(*self.inner.get() as *mut Block).offset(index.try_into().unwrap()) = block;
+    /// The caller must ensure that `index` is in bounds, no other references exist or are created
+    /// to the corresponding block, and no data races happen while the returned reference lives.
+    #[allow(clippy::mut_from_ref)] // TODO: check that this really is a false positive (Mutex?)
+    pub unsafe fn get_mut_unchecked(&self, index: usize) -> &mut Block {
+        // SAFETY: by construction, the pointer to the slice of blocks is dereferenceable.
+        let first_block: *mut Block = unsafe { *self.inner.get() } as _;
+        // SAFETY: the caller promises that the `index` is in bounds; therefore, we're within
+        // the bounds of the allocated object, and the offset in bytes fits in an `isize`.
+        let ptr = unsafe { first_block.add(index) };
+        // SAFETY: the caller promises that there are no other references or accesses, nor data
+        // races, that may access the requested `Block`.
+        unsafe { &mut *ptr }
     }
 }
 
-// SAFETY: we hope for the best, really.
-unsafe impl Send for UnsafeMemory {}
-unsafe impl Sync for UnsafeMemory {}
+// SAFETY: passing or sharing `UnsafeBlocks` accross threads is, in itself, safe. Using it isn't,
+// as the user must ensure that there are no data races or mutable aliasing, but all of its methods
+// already require `unsafe`.
+unsafe impl Send for UnsafeBlocks<'_> {}
+unsafe impl Sync for UnsafeBlocks<'_> {}
 
 impl Debug for Memory {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -140,13 +160,5 @@ mod tests {
         assert_eq!(memory.rows, lanes as usize);
         assert_eq!(memory.cols, lane_length as usize);
         assert_eq!(memory.blocks.len(), 512);
-    }
-
-    #[cfg(feature = "crossbeam-utils")]
-    #[test]
-    fn as_lanes_mut_returns_correct_vec() {
-        let mut memory = Memory::new(4, 128);
-        let lanes = memory.as_lanes_mut();
-        assert_eq!(lanes.len(), 4);
     }
 }
