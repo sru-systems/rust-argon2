@@ -12,6 +12,7 @@ use crate::core;
 use crate::encoding;
 use crate::memory::Memory;
 use crate::result::Result;
+use crate::thread_mode::ThreadMode;
 use crate::variant::Variant;
 use crate::version::Version;
 
@@ -73,16 +74,25 @@ pub fn encoded_len(
 /// ```
 ///
 ///
-/// Create an Argon2d encoded hash with 4 lanes:
+/// Create an Argon2d encoded hash with 4 lanes and parallel execution:
 ///
 /// ```
-/// use argon2::{self, Config, Variant};
+/// use argon2::{self, Config, ThreadMode, Variant};
 ///
 /// let pwd = b"password";
 /// let salt = b"somesalt";
 /// let mut config = Config::default();
 /// config.variant = Variant::Argon2d;
-/// config.lanes = 4;
+#[cfg_attr(feature = "crossbeam-utils", doc = "config.lanes = 4;")]
+#[cfg_attr(
+    feature = "crossbeam-utils",
+    doc = "config.thread_mode = ThreadMode::Parallel;"
+)]
+#[cfg_attr(not(feature = "crossbeam-utils"), doc = "config.lanes = 1;")]
+#[cfg_attr(
+    not(feature = "crossbeam-utils"),
+    doc = "config.thread_mode = ThreadMode::Sequential;"
+)]
 /// let encoded = argon2::hash_encoded(pwd, salt, &config).unwrap();
 /// ```
 pub fn hash_encoded(pwd: &[u8], salt: &[u8], config: &Config) -> Result<String> {
@@ -108,16 +118,25 @@ pub fn hash_encoded(pwd: &[u8], salt: &[u8], config: &Config) -> Result<String> 
 /// ```
 ///
 ///
-/// Create an Argon2d hash with 4 lanes:
+/// Create an Argon2d hash with 4 lanes and parallel execution:
 ///
 /// ```
-/// use argon2::{self, Config, Variant};
+/// use argon2::{self, Config, ThreadMode, Variant};
 ///
 /// let pwd = b"password";
 /// let salt = b"somesalt";
 /// let mut config = Config::default();
 /// config.variant = Variant::Argon2d;
-/// config.lanes = 4;
+#[cfg_attr(feature = "crossbeam-utils", doc = "config.lanes = 4;")]
+#[cfg_attr(
+    feature = "crossbeam-utils",
+    doc = "config.thread_mode = ThreadMode::Parallel;"
+)]
+#[cfg_attr(not(feature = "crossbeam-utils"), doc = "config.lanes = 1;")]
+#[cfg_attr(
+    not(feature = "crossbeam-utils"),
+    doc = "config.thread_mode = ThreadMode::Sequential;"
+)]
 /// let vec = argon2::hash_raw(pwd, salt, &config).unwrap();
 /// ```
 pub fn hash_raw(pwd: &[u8], salt: &[u8], config: &Config) -> Result<Vec<u8>> {
@@ -160,12 +179,18 @@ pub fn verify_encoded(encoded: &str, pwd: &[u8]) -> Result<bool> {
 /// ```
 pub fn verify_encoded_ext(encoded: &str, pwd: &[u8], secret: &[u8], ad: &[u8]) -> Result<bool> {
     let decoded = encoding::decode_string(encoded)?;
+    let threads = if cfg!(feature = "crossbeam-utils") {
+        decoded.parallelism
+    } else {
+        1
+    };
     let config = Config {
         variant: decoded.variant,
         version: decoded.version,
         mem_cost: decoded.mem_cost,
         time_cost: decoded.time_cost,
         lanes: decoded.parallelism,
+        thread_mode: ThreadMode::from_threads(threads),
         secret,
         ad,
         hash_length: decoded.hash.len() as u32,

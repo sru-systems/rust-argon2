@@ -6,6 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use crate::thread_mode::ThreadMode;
 use crate::variant::Variant;
 use crate::version::Version;
 
@@ -14,7 +15,7 @@ use crate::version::Version;
 /// # Examples
 ///
 /// ```
-/// use argon2::{Config, Variant, Version};
+/// use argon2::{Config, ThreadMode, Variant, Version};
 ///
 /// let config = Config::default();
 /// assert_eq!(config.ad, &[]);
@@ -24,6 +25,7 @@ use crate::version::Version;
 /// assert_eq!(config.secret, &[]);
 /// assert_eq!(config.time_cost, 2);
 /// assert_eq!(config.variant, Variant::Argon2id);
+/// assert_eq!(config.thread_mode, ThreadMode::Sequential);
 /// assert_eq!(config.version, Version::Version13);
 /// ```
 #[derive(Clone, Debug, PartialEq)]
@@ -42,6 +44,9 @@ pub struct Config<'a> {
 
     /// The key.
     pub secret: &'a [u8],
+
+    /// The thread mode.
+    pub thread_mode: ThreadMode,
 
     /// The number of passes.
     pub time_cost: u32,
@@ -62,6 +67,7 @@ impl<'a> Config<'a> {
             lanes: 1,
             mem_cost: 4096,
             secret: &[],
+            thread_mode: ThreadMode::default(),
             time_cost: 3,
             variant: Variant::Argon2i,
             version: Version::Version13,
@@ -76,6 +82,7 @@ impl<'a> Config<'a> {
             lanes: 1,
             mem_cost: 47104,
             secret: &[],
+            thread_mode: ThreadMode::default(),
             time_cost: 1,
             variant: Variant::Argon2id,
             version: Version::Version13,
@@ -90,6 +97,7 @@ impl<'a> Config<'a> {
             lanes: 1,
             mem_cost: 19456,
             secret: &[],
+            thread_mode: ThreadMode::default(),
             time_cost: 2,
             variant: Variant::Argon2id,
             version: Version::Version13,
@@ -104,6 +112,7 @@ impl<'a> Config<'a> {
             lanes: 1,
             mem_cost: 12288,
             secret: &[],
+            thread_mode: ThreadMode::default(),
             time_cost: 3,
             variant: Variant::Argon2id,
             version: Version::Version13,
@@ -118,6 +127,7 @@ impl<'a> Config<'a> {
             lanes: 1,
             mem_cost: 9216,
             secret: &[],
+            thread_mode: ThreadMode::default(),
             time_cost: 4,
             variant: Variant::Argon2id,
             version: Version::Version13,
@@ -132,6 +142,7 @@ impl<'a> Config<'a> {
             lanes: 1,
             mem_cost: 7168,
             secret: &[],
+            thread_mode: ThreadMode::default(),
             time_cost: 5,
             variant: Variant::Argon2id,
             version: Version::Version13,
@@ -146,6 +157,7 @@ impl<'a> Config<'a> {
             lanes: 1,
             mem_cost: 2097152,
             secret: &[],
+            thread_mode: ThreadMode::default(),
             time_cost: 1,
             variant: Variant::Argon2id,
             version: Version::Version13,
@@ -160,10 +172,15 @@ impl<'a> Config<'a> {
             lanes: 1,
             mem_cost: 65536,
             secret: &[],
+            thread_mode: ThreadMode::default(),
             time_cost: 3,
             variant: Variant::Argon2id,
             version: Version::Version13,
         }
+    }
+
+    pub fn uses_sequential(&self) -> bool {
+        self.thread_mode == ThreadMode::Sequential || self.lanes == 1
     }
 }
 
@@ -178,6 +195,7 @@ impl<'a> Default for Config<'a> {
 mod tests {
 
     use crate::config::Config;
+    use crate::thread_mode::ThreadMode;
     use crate::variant::Variant;
     use crate::version::Version;
 
@@ -189,6 +207,7 @@ mod tests {
         assert_eq!(config.lanes, 1);
         assert_eq!(config.mem_cost, 19 * 1024);
         assert_eq!(config.secret, &[]);
+        assert_eq!(config.thread_mode, ThreadMode::Sequential);
         assert_eq!(config.time_cost, 2);
         assert_eq!(config.variant, Variant::Argon2id);
         assert_eq!(config.version, Version::Version13);
@@ -202,6 +221,7 @@ mod tests {
         assert_eq!(config.lanes, 1);
         assert_eq!(config.mem_cost, 4096);
         assert_eq!(config.secret, &[]);
+        assert_eq!(config.thread_mode, ThreadMode::Sequential);
         assert_eq!(config.time_cost, 3);
         assert_eq!(config.variant, Variant::Argon2i);
         assert_eq!(config.version, Version::Version13);
@@ -215,6 +235,7 @@ mod tests {
         assert_eq!(config.lanes, 1);
         assert_eq!(config.mem_cost, 46 * 1024);
         assert_eq!(config.secret, &[]);
+        assert_eq!(config.thread_mode, ThreadMode::Sequential);
         assert_eq!(config.time_cost, 1);
         assert_eq!(config.variant, Variant::Argon2id);
         assert_eq!(config.version, Version::Version13);
@@ -228,6 +249,7 @@ mod tests {
         assert_eq!(config.lanes, 1);
         assert_eq!(config.mem_cost, 19 * 1024);
         assert_eq!(config.secret, &[]);
+        assert_eq!(config.thread_mode, ThreadMode::Sequential);
         assert_eq!(config.time_cost, 2);
         assert_eq!(config.variant, Variant::Argon2id);
         assert_eq!(config.version, Version::Version13);
@@ -241,6 +263,7 @@ mod tests {
         assert_eq!(config.lanes, 1);
         assert_eq!(config.mem_cost, 12 * 1024);
         assert_eq!(config.secret, &[]);
+        assert_eq!(config.thread_mode, ThreadMode::Sequential);
         assert_eq!(config.time_cost, 3);
         assert_eq!(config.variant, Variant::Argon2id);
         assert_eq!(config.version, Version::Version13);
@@ -254,6 +277,7 @@ mod tests {
         assert_eq!(config.lanes, 1);
         assert_eq!(config.mem_cost, 9 * 1024);
         assert_eq!(config.secret, &[]);
+        assert_eq!(config.thread_mode, ThreadMode::Sequential);
         assert_eq!(config.time_cost, 4);
         assert_eq!(config.variant, Variant::Argon2id);
         assert_eq!(config.version, Version::Version13);
@@ -267,6 +291,7 @@ mod tests {
         assert_eq!(config.lanes, 1);
         assert_eq!(config.mem_cost, 7 * 1024);
         assert_eq!(config.secret, &[]);
+        assert_eq!(config.thread_mode, ThreadMode::Sequential);
         assert_eq!(config.time_cost, 5);
         assert_eq!(config.variant, Variant::Argon2id);
         assert_eq!(config.version, Version::Version13);
@@ -280,6 +305,7 @@ mod tests {
         assert_eq!(config.lanes, 1);
         assert_eq!(config.mem_cost, 2 * 1024 * 1024);
         assert_eq!(config.secret, &[]);
+        assert_eq!(config.thread_mode, ThreadMode::Sequential);
         assert_eq!(config.time_cost, 1);
         assert_eq!(config.variant, Variant::Argon2id);
         assert_eq!(config.version, Version::Version13);
@@ -293,6 +319,7 @@ mod tests {
         assert_eq!(config.lanes, 1);
         assert_eq!(config.mem_cost, 64 * 1024);
         assert_eq!(config.secret, &[]);
+        assert_eq!(config.thread_mode, ThreadMode::Sequential);
         assert_eq!(config.time_cost, 3);
         assert_eq!(config.variant, Variant::Argon2id);
         assert_eq!(config.version, Version::Version13);

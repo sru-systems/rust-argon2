@@ -8,7 +8,7 @@
 
 // These tests are based on Argon's test.c test suite.
 
-use argon2::{Config, Error, Variant, Version};
+use argon2::{Config, Error, ThreadMode, Variant, Version};
 use hex::ToHex;
 
 #[cfg(not(debug_assertions))]
@@ -1014,6 +1014,7 @@ fn test_hash_raw_with_not_enough_memory() {
         mem_cost: 2,
         time_cost: 2,
         lanes: 1,
+        thread_mode: ThreadMode::Sequential,
         secret: &[],
         ad: &[],
         hash_length: 32,
@@ -1032,6 +1033,7 @@ fn test_hash_raw_with_too_short_salt() {
         mem_cost: 2048,
         time_cost: 2,
         lanes: 1,
+        thread_mode: ThreadMode::Sequential,
         secret: &[],
         ad: &[],
         hash_length: 32,
@@ -1051,12 +1053,14 @@ fn hash_test(
     hex: &str,
     enc: &str,
 ) {
+    let threads = if cfg!(feature = "crossbeam-utils") { p } else { 1 };
     let config = Config {
         variant: var,
         version: ver,
         mem_cost: m,
         time_cost: t,
         lanes: p,
+        thread_mode: ThreadMode::from_threads(threads),
         secret: &[],
         ad: &[],
         hash_length: 32,

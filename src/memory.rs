@@ -32,6 +32,17 @@ impl Memory {
         let blocks = vec![Block::zero(); total].into_boxed_slice();
         Memory { rows, cols, blocks }
     }
+
+    #[cfg(feature = "crossbeam-utils")]
+    /// Gets the mutable lanes representation of the memory matrix.
+    pub fn as_lanes_mut(&mut self) -> Vec<&mut Memory> {
+        let ptr: *mut Memory = self;
+        let mut vec = Vec::with_capacity(self.rows);
+        for _ in 0..self.rows {
+            vec.push(unsafe { &mut (*ptr) });
+        }
+        vec
+    }
 }
 
 impl Debug for Memory {
@@ -94,5 +105,13 @@ mod tests {
         assert_eq!(memory.rows, lanes as usize);
         assert_eq!(memory.cols, lane_length as usize);
         assert_eq!(memory.blocks.len(), 512);
+    }
+
+    #[cfg(feature = "crossbeam-utils")]
+    #[test]
+    fn as_lanes_mut_returns_correct_vec() {
+        let mut memory = Memory::new(4, 128);
+        let lanes = memory.as_lanes_mut();
+        assert_eq!(lanes.len(), 4);
     }
 }

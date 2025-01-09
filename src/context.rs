@@ -118,6 +118,7 @@ mod tests {
     use crate::config::Config;
     use crate::context::Context;
     use crate::error::Error;
+    use crate::thread_mode::ThreadMode;
     use crate::variant::Variant;
     use crate::version::Version;
 
@@ -129,6 +130,7 @@ mod tests {
             lanes: 4,
             mem_cost: 4096,
             secret: b"secret",
+            thread_mode: ThreadMode::Sequential,
             time_cost: 3,
             variant: Variant::Argon2i,
             version: Version::Version13,
