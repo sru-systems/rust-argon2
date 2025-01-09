@@ -7,6 +7,7 @@
 // except according to those terms.
 
 use crate::block::Block;
+use std::cell::UnsafeCell;
 use std::fmt;
 use std::fmt::Debug;
 use std::ops::{Index, IndexMut};
@@ -44,6 +45,40 @@ impl Memory {
         vec
     }
 }
+
+pub struct UnsafeMemory {
+    inner: UnsafeCell<*mut [Block]>,
+}
+
+impl UnsafeMemory {
+    pub fn new(mem: &mut Memory) -> UnsafeMemory {
+        UnsafeMemory {
+            inner: UnsafeCell::new(&mut *mem.blocks),
+        }
+    }
+
+    /// # Safety
+    ///
+    /// The caller must ensure `mem` is valid, `index` is in bounds, and that no other references
+    /// exist to the requested block.
+    #[cfg(feature = "crossbeam-utils")]
+    pub unsafe fn get_block_unsafe(&self, index: usize) -> &Block {
+        &*(*self.inner.get() as *const Block).offset(index.try_into().unwrap())
+    }
+
+    /// # Safety
+    ///
+    /// The caller must ensure `mem` is valid, `index` is in bounds, and that no other references
+    /// exist to the block to be replaced.
+    #[cfg(feature = "crossbeam-utils")]
+    pub unsafe fn set_block_unsafe(&self, index: usize, block: Block) {
+        *(*self.inner.get() as *mut Block).offset(index.try_into().unwrap()) = block;
+    }
+}
+
+// SAFETY: we hope for the best, really.
+unsafe impl Send for UnsafeMemory {}
+unsafe impl Sync for UnsafeMemory {}
 
 impl Debug for Memory {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

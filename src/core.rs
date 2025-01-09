@@ -9,7 +9,7 @@
 use crate::block::Block;
 use crate::common;
 use crate::context::Context;
-use crate::memory::Memory;
+use crate::memory::{Memory, UnsafeMemory};
 use crate::variant::Variant;
 use crate::version::Version;
 use blake2b_simd::Params;
@@ -185,10 +185,12 @@ fn fill_first_blocks(context: &Context, memory: &mut Memory, h0: &mut [u8]) {
 
 #[cfg(feature = "crossbeam-utils")]
 fn fill_memory_blocks_mt(context: &Context, memory: &mut Memory) {
+    let mem = UnsafeMemory::new(memory);
+    let mem = &mem;
     for p in 0..context.config.time_cost {
         for s in 0..common::SYNC_POINTS {
             let _ = scope(|scoped| {
-                for (l, mem) in (0..context.config.lanes).zip(memory.as_lanes_mut()) {
+                for l in 0..context.config.lanes {
                     let position = Position {
                         pass: p,
                         lane: l,
@@ -219,13 +221,13 @@ fn fill_memory_blocks_st(context: &Context, memory: &mut Memory) {
                     slice: s,
                     index: 0,
                 };
-                fill_segment(context, &position, memory);
+                fill_segment(context, &position, &UnsafeMemory::new(memory));
             }
         }
     }
 }
 
-fn fill_segment(context: &Context, position: &Position, memory: &mut Memory) {
+fn fill_segment(context: &Context, position: &Position, memory: &UnsafeMemory) {
     let mut position = position.clone();
     let data_independent_addressing = (context.config.variant == Variant::Argon2i)
         || (context.config.variant == Variant::Argon2id && position.pass == 0)
@@ -280,7 +282,7 @@ fn fill_segment(context: &Context, position: &Position, memory: &mut Memory) {
             }
             pseudo_rand = address_block[(i % common::ADDRESSES_IN_BLOCK) as usize];
         } else {
-            pseudo_rand = memory[prev_offset][0];
+            pseudo_rand = unsafe { memory.get_block_unsafe(prev_offset as usize) }[0];
         }
 
         // 1.2.2 Computing the lane of the reference block
@@ -299,10 +301,12 @@ fn fill_segment(context: &Context, position: &Position, memory: &mut Memory) {
 
         // 2 Creating a new block
         let index = context.lane_length as u64 * ref_lane + ref_index as u64;
-        let mut curr_block = memory[curr_offset].clone();
+        assert_ne!(curr_offset, prev_offset);
+        assert_ne!(curr_offset as usize, index as usize);
+        let mut curr_block = unsafe { memory.get_block_unsafe(curr_offset as usize) }.clone();
         {
-            let prev_block = &memory[prev_offset];
-            let ref_block = &memory[index];
+            let prev_block = unsafe { memory.get_block_unsafe(prev_offset as usize) };
+            let ref_block = unsafe { memory.get_block_unsafe(index as usize) };
             if context.config.version == Version::Version10 || position.pass == 0 {
                 fill_block(prev_block, ref_block, &mut curr_block, false);
             } else {
@@ -310,7 +314,7 @@ fn fill_segment(context: &Context, position: &Position, memory: &mut Memory) {
             }
         }
 
-        memory[curr_offset] = curr_block;
+        unsafe { memory.set_block_unsafe(curr_offset as usize, curr_block) };
         curr_offset += 1;
         prev_offset += 1;
     }
