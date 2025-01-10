@@ -13,6 +13,7 @@ use std::fmt;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::ops::{Index, IndexMut};
+use std::ptr::NonNull;
 
 /// Structure representing the memory matrix.
 pub struct Memory {
@@ -40,7 +41,7 @@ impl Memory {
     #[cfg(feature = "crossbeam-utils")]
     pub fn as_unsafe_blocks(&mut self) -> UnsafeBlocks<'_> {
         UnsafeBlocks {
-            ptr: &mut *self.blocks,
+            blocks: NonNull::new(self.blocks.as_mut_ptr()).unwrap(),
             phantom: PhantomData,
         }
     }
@@ -48,11 +49,10 @@ impl Memory {
 
 /// A wrapped raw pointer to the flat array of blocks, useful for parallel disjoint access.
 ///
-/// All operations on this type are unchecked and require `unsafe`. The caller is responsible for
-/// accessing the blocks in a manner that follows the aliasing rules and that doesn't result in
-/// data races.
+/// All operations on this type are unchecked and require `unsafe`. Callers are responsible for
+/// accessing the blocks without violating the aliasing rules or resulting in data races.
 pub struct UnsafeBlocks<'a> {
-    ptr: *mut [Block],
+    blocks: NonNull<Block>,
     phantom: PhantomData<&'a [Block]>,
 }
 
@@ -66,13 +66,12 @@ impl UnsafeBlocks<'_> {
     /// lives.
     #[cfg(feature = "crossbeam-utils")]
     pub unsafe fn get_unchecked(&self, index: usize) -> &Block {
-        let first_block: *const Block = self.ptr as _;
-        // SAFETY: the caller promises that the `index` is in bounds; therefore, we're within
-        // the bounds of the allocated object, and the offset in bytes fits in an `isize`.
-        let ptr = unsafe { first_block.add(index) };
-        // SAFETY: the caller promises that there are no mutable references or data races to
-        // mutate the requested `Block`.
-        unsafe { &*ptr }
+        // SAFETY: the caller promises that the `index` is in bounds; therefore, we're within the
+        // bounds of the allocated object, and the offset in bytes fits in an `isize`.
+        let ptr = unsafe { self.blocks.add(index) };
+        // SAFETY: the caller promises that there are no mutable references to the requested
+        // `Block` or data races; and `ptr` points to a valid and aligned `Block`.
+        unsafe { ptr.as_ref() }
     }
 
     /// Get a mutable reference to the `Block` at `index`.
@@ -83,19 +82,17 @@ impl UnsafeBlocks<'_> {
     /// to the corresponding block, and no data races happen while the returned reference lives.
     #[allow(clippy::mut_from_ref)]
     pub unsafe fn get_mut_unchecked(&self, index: usize) -> &mut Block {
-        let first_block: *mut Block = self.ptr as _;
         // SAFETY: the caller promises that the `index` is in bounds; therefore, we're within
         // the bounds of the allocated object, and the offset in bytes fits in an `isize`.
-        let ptr = unsafe { first_block.add(index) };
-        // SAFETY: the caller promises that there are no other references or accesses, nor data
-        // races, that may access the requested `Block`.
-        unsafe { &mut *ptr }
+        let mut ptr = unsafe { self.blocks.add(index) };
+        // SAFETY: the caller promises that there are no other references, accesses, or data races
+        // affecting the target `Block`; and `ptr` points to a valid and aligned `Block`.
+        unsafe { ptr.as_mut() }
     }
 }
 
-// SAFETY: passing or sharing `UnsafeBlocks` accross threads is, in itself, safe. Using it isn't,
-// as the user must ensure that there are no data races or mutable aliasing, but all of its methods
-// already require `unsafe`.
+// SAFETY: passing or sharing an `UnsafeBlocks` accross threads is, in itself, safe (calling any
+// methods on it isn't, but they already require `unsafe`).
 unsafe impl Send for UnsafeBlocks<'_> {}
 unsafe impl Sync for UnsafeBlocks<'_> {}
 
