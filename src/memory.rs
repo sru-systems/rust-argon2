@@ -85,6 +85,14 @@ impl UnsafeBlocks<'_> {
         let mut ptr = unsafe { self.blocks.add(index) };
         // SAFETY: the caller promises that there are no other references, accesses, or data races
         // affecting the target `Block`; and `ptr` points to a valid and aligned `Block`.
+        //
+        // Also note that this isn't interior mutability, as we're going through a `NonNull`
+        // pointer derived from a mutable reference (and interior mutability is not transitive
+        // through raw pointers[1][2][3]).
+        //
+        // [1]: https://rust-lang.github.io/unsafe-code-guidelines/glossary.html#interior-mutability
+        // [2]: https://doc.rust-lang.org/stable/reference/behavior-considered-undefined.html?highlight=undefin#r-undefined.immutable
+        // [3]: https://github.com/rust-lang/reference/issues/1227
         unsafe { ptr.as_mut() }
     }
 }
