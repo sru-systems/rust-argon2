@@ -33,11 +33,17 @@ pub fn initialize(context: &Context, memory: &mut Memory) {
 }
 
 /// Fills all the memory blocks.
-pub fn fill_memory_blocks(context: &Context, memory: &mut Memory) {
+///
+/// # Safety
+///
+/// The provided `context` and `memory` arguments must be consistent.
+pub unsafe fn fill_memory_blocks(context: &Context, memory: &mut Memory) {
     if context.config.uses_sequential() {
-        fill_memory_blocks_st(context, memory);
+        // SAFETY: adhering to the safety contract is delegated to the caller.
+        unsafe { fill_memory_blocks_st(context, memory) };
     } else {
-        fill_memory_blocks_mt(context, memory);
+        // SAFETY: adhering to the safety contract is delegated to the caller.
+        unsafe { fill_memory_blocks_mt(context, memory) };
     }
 }
 
@@ -185,8 +191,11 @@ fn fill_first_blocks(context: &Context, memory: &mut Memory, h0: &mut [u8]) {
     }
 }
 
+/// # Safety
+///
+/// The provided `context` and `memory` arguments must be consistent.
 #[cfg(feature = "crossbeam-utils")]
-fn fill_memory_blocks_mt(context: &Context, memory: &mut Memory) {
+unsafe fn fill_memory_blocks_mt(context: &Context, memory: &mut Memory) {
     let mem = &memory.as_unsafe_blocks();
     for p in 0..context.config.time_cost {
         for s in 0..common::SYNC_POINTS {
@@ -211,11 +220,14 @@ fn fill_memory_blocks_mt(context: &Context, memory: &mut Memory) {
 }
 
 #[cfg(not(feature = "crossbeam-utils"))]
-fn fill_memory_blocks_mt(_: &Context, _: &mut Memory) {
+unsafe fn fill_memory_blocks_mt(_: &Context, _: &mut Memory) {
     unimplemented!()
 }
 
-fn fill_memory_blocks_st(context: &Context, memory: &mut Memory) {
+/// # Safety
+///
+/// The provided `context` and `memory` arguments must be consistent.
+unsafe fn fill_memory_blocks_st(context: &Context, memory: &mut Memory) {
     for p in 0..context.config.time_cost {
         for s in 0..common::SYNC_POINTS {
             for l in 0..context.config.lanes {
@@ -236,9 +248,12 @@ fn fill_memory_blocks_st(context: &Context, memory: &mut Memory) {
 /// # Safety
 ///
 /// The memory must be processed slicewise, and with this function being called exactly once per
-/// segment. If segments are filled in parallel, synchronization points are required between
-/// slices. Finally, the supplied arguments must be consistent, otherwise offsets may be computed
-/// incorrectly, leading to memory bugs.
+/// segment, where a segment is the intersection between the slice being processed and a lane.
+///
+/// If segments are filled in parallel, synchronization points are also required between slices.
+///
+/// Finally, the provided `context` and `memory` arguments must be consistent, and `position` must
+/// reflect the correct current lane and slice.
 unsafe fn fill_segment(context: &Context, position: &Position, memory: &UnsafeBlocks) {
     let mut position = position.clone();
     let data_independent_addressing = (context.config.variant == Variant::Argon2i)
@@ -286,10 +301,6 @@ unsafe fn fill_segment(context: &Context, position: &Position, memory: &UnsafeBl
             prev_offset = curr_offset - 1;
         }
 
-        // Ensure that offsets are in bounds for later `unsafe` operations.
-        assert!(curr_offset < context.memory_blocks);
-        assert!(prev_offset < context.memory_blocks);
-
         // 1.2 Computing the index of the reference block
         // 1.2.1 Taking pseudo-random value from the previous block
         if data_independent_addressing {
@@ -298,9 +309,10 @@ unsafe fn fill_segment(context: &Context, position: &Position, memory: &UnsafeBl
             }
             pseudo_rand = address_block[(i % common::ADDRESSES_IN_BLOCK) as usize];
         } else {
-            // SAFETY: `prev_offset` has been asserted to be in bounds, and the slicewise
-            // computation of Argon2 means that the referenced block shouldn't be mutably aliased
-            // or subject to a data race.
+            assert!(prev_offset < context.memory_blocks);
+            assert!(prev_offset / context.lane_length == position.lane);
+            // SAFETY: `prev_offset` is in bounds and on this lane, so the block isn't mutably
+            // aliased or mutated from another thread (in the current slice).
             pseudo_rand = unsafe { memory.get_unchecked(prev_offset as usize) }[0];
         }
 
@@ -320,10 +332,25 @@ unsafe fn fill_segment(context: &Context, position: &Position, memory: &UnsafeBl
 
         // 2 Creating a new block
         let index = context.lane_length as u64 * ref_lane + ref_index as u64;
+        assert!(curr_offset < context.memory_blocks);
+        assert!(prev_offset < context.memory_blocks);
         assert!(index < context.memory_blocks as u64);
-        // SAFETY: `curr_offset`, `prev_offset` and `index` have been asserted to be in bounds and
-        // the slicewise computation of Argon2 means that there should be no mutable aliasing or
-        // data races.
+        assert!(curr_offset != prev_offset && (curr_offset as u64) != index);
+        assert!(prev_offset / context.lane_length == position.lane);
+        assert!(
+            index / (context.lane_length as u64) == position.lane as u64
+                || index % (context.lane_length as u64) / (context.segment_length as u64)
+                    != position.slice as u64
+        );
+        // SAFETY:
+        // - `curr_offset`, `prev_offset` and `index` are in bounds and refer to different blocks;
+        // - `curr_offset` is only accessed by this thread (in the current slice), and there are no
+        //   other references to the corresponding block;
+        // - `prev_offset` is on the same lane as `curr_offset`, and therefore the corresponding
+        //   block isn't mutably aliased or mutated from another thread (in the current slice);
+        // - `index` is either on the same lane or on a different slice, and in both cases it
+        //   cannot be mutably aliased or mutated from another thread (during the processing of the
+        //   current slice).
         let curr_block = unsafe { memory.get_mut_unchecked(curr_offset as usize) };
         let prev_block = unsafe { memory.get_unchecked(prev_offset as usize) };
         let ref_block = unsafe { memory.get_unchecked(index as usize) };

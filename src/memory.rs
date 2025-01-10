@@ -36,7 +36,7 @@ impl Memory {
         Memory { rows, cols, blocks }
     }
 
-    /// Return a wrapped pointer to the flat array of blocks for parallel disjoint access.
+    /// Returns a pointer to the flat array of blocks useful for parallel disjoint access.
     #[cfg(feature = "crossbeam-utils")]
     pub fn as_unsafe_blocks(&mut self) -> UnsafeBlocks<'_> {
         UnsafeBlocks {
@@ -46,9 +46,11 @@ impl Memory {
     }
 }
 
-/// Wrapped pointer to the flat array of blocks for parallel disjoint access.
+/// A wrapped raw pointer to the flat array of blocks, useful for parallel disjoint access.
 ///
-/// All operations are unchecked and require `unsafe`.
+/// All operations on this type are unchecked and require `unsafe`. The caller is responsible for
+/// accessing the blocks in a manner that follows the aliasing rules and that doesn't result in
+/// data races.
 pub struct UnsafeBlocks<'a> {
     ptr: *mut [Block],
     phantom: PhantomData<&'a [Block]>,
