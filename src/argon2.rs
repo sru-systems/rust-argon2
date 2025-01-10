@@ -202,7 +202,6 @@ pub fn verify_encoded_ext(encoded: &str, pwd: &[u8], secret: &[u8], ad: &[u8]) -
 ///
 /// # Examples
 ///
-///
 /// ```
 /// use argon2::{self, Config};
 ///
@@ -228,7 +227,7 @@ pub fn verify_raw(pwd: &[u8], salt: &[u8], hash: &[u8], config: &Config) -> Resu
 fn run(context: &Context) -> Vec<u8> {
     let mut memory = Memory::new(context.config.lanes, context.lane_length);
     core::initialize(context, &mut memory);
-    // SAFETY: `memory` is consistent with `context` by construction.
+    // SAFETY: `memory` is constructed from `context`.
     unsafe { core::fill_memory_blocks(context, &mut memory) };
     core::finalize(context, &memory)
 }

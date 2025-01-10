@@ -208,9 +208,11 @@ unsafe fn fill_memory_blocks_mt(context: &Context, memory: &mut Memory) {
                         index: 0,
                     };
                     scoped.spawn(move |_| {
-                        // SAFETY: segments are processed slicewise and then each passed to a
-                        // different thread. The threads synchronize when the `scope` is dropped.
-                        // The arguments are correct by construction.
+                        // SAFETY: segments are processed slicewise and then each is handed
+                        // (exactly once) to a worker thread. The threads synchronize when the
+                        // `scope` is dropped, before the next slice is processed. The caller
+                        // promises that `context` and `memory` are consistent, and `position`
+                        // reflects the current lane and slice.
                         unsafe { fill_segment(context, &position, mem) };
                     });
                 }
@@ -237,8 +239,9 @@ unsafe fn fill_memory_blocks_st(context: &Context, memory: &mut Memory) {
                     slice: s,
                     index: 0,
                 };
-                // SAFETY: segments are processed slicewise and then sequentially, and the
-                // arguments are correct by construction.
+                // SAFETY: segments are processed slicewise and then sequentially, the caller
+                // promises that `context` and `memory` are consistent, and `position` reflects the
+                // current lane and slice.
                 unsafe { fill_segment(context, &position, &memory.as_unsafe_blocks()) };
             }
         }
@@ -247,10 +250,11 @@ unsafe fn fill_memory_blocks_st(context: &Context, memory: &mut Memory) {
 
 /// # Safety
 ///
-/// The memory must be processed slicewise, and with this function being called exactly once per
+/// The memory must be processed slicewise, and this function must be called exactly once per
 /// segment, where a segment is the intersection between the slice being processed and a lane.
+/// That is, within a slice, this function is called exactly once per lane.
 ///
-/// If segments are filled in parallel, synchronization points are also required between slices.
+/// If segments are filled in parallel, synchronization points are required between slices.
 ///
 /// Finally, the provided `context` and `memory` arguments must be consistent, and `position` must
 /// reflect the correct current lane and slice.
@@ -342,15 +346,14 @@ unsafe fn fill_segment(context: &Context, position: &Position, memory: &UnsafeBl
                 || index % (context.lane_length as u64) / (context.segment_length as u64)
                     != position.slice as u64
         );
-        // SAFETY:
-        // - `curr_offset`, `prev_offset` and `index` are in bounds and refer to different blocks;
-        // - `curr_offset` is only accessed by this thread (in the current slice), and there are no
-        //   other references to the corresponding block;
+        // SAFETY: `curr_offset`, `prev_offset` and `index` are in bounds and refer to different
+        // blocks; and during the processing of the current slice:
+        // - `curr_offset` is only accessed by this thread, and there are no other references to
+        //   the corresponding block;
         // - `prev_offset` is on the same lane as `curr_offset`, and therefore the corresponding
-        //   block isn't mutably aliased or mutated from another thread (in the current slice);
-        // - `index` is either on the same lane or on a different slice, and in both cases it
-        //   cannot be mutably aliased or mutated from another thread (during the processing of the
-        //   current slice).
+        //   block isn't mutably aliased or mutated from another thread;
+        // - `index` is either on the same lane or on a different slice, and in both cases it will
+        //   not be mutably aliased or mutated from another thread.
         let curr_block = unsafe { memory.get_mut_unchecked(curr_offset as usize) };
         let prev_block = unsafe { memory.get_unchecked(prev_offset as usize) };
         let ref_block = unsafe { memory.get_unchecked(index as usize) };
