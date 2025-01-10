@@ -38,7 +38,6 @@ impl Memory {
     }
 
     /// Returns a pointer to the flat array of blocks useful for parallel disjoint access.
-    #[cfg(feature = "crossbeam-utils")]
     pub fn as_unsafe_blocks(&mut self) -> UnsafeBlocks<'_> {
         UnsafeBlocks {
             blocks: NonNull::new(self.blocks.as_mut_ptr()).unwrap(),
@@ -64,7 +63,6 @@ impl UnsafeBlocks<'_> {
     /// The caller must ensure that `index` is in bounds, no mutable references exist or are
     /// created to the corresponding block, and no data races happen while the returned reference
     /// lives.
-    #[cfg(feature = "crossbeam-utils")]
     pub unsafe fn get_unchecked(&self, index: usize) -> &Block {
         // SAFETY: the caller promises that the `index` is in bounds; therefore, we're within the
         // bounds of the allocated object, and the offset in bytes fits in an `isize`.
