@@ -238,13 +238,41 @@ mod tests {
 
     #[test]
     fn single_thread_verification_multi_lane_hash() {
-        /*
-        let hash = hash_encoded(b"foo", b"abcdefghijklmnopqrstuvwxyz", &Config {
-            lanes: 4, thread_mode: ThreadMode::Parallel,
-            ..Config::default()
-        });
-        */
-        let hash = "$argon2i$v=19$m=4096,t=3,p=4$YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo$BvBk2OaSofBHfbrUW61nHrWB/43xgfs/QJJ5DkMAd8I";
-        verify_encoded(hash, b"foo").unwrap();
+        let hash = "$argon2i$v=19$m=4096,t=3,p=4$YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo$\
+                    BvBk2OaSofBHfbrUW61nHrWB/43xgfs/QJJ5DkMAd8I";
+        let res = verify_encoded(hash, b"foo").unwrap();
+        assert!(res);
+    }
+
+    #[test]
+    fn test_argon2id_for_miri() {
+        let hash = "$argon2id$v=19$m=256,t=2,p=16$c29tZXNhbHQ$\
+                    0gasyPnKXiBHQ5bft/bd4jrmy2DdtrLTX3JR9co7fRY";
+        let res = verify_encoded(hash, b"password").unwrap();
+        assert!(res);
+    }
+
+    #[test]
+    fn test_argon2id_for_miri_2() {
+        let hash = "$argon2id$v=19$m=512,t=2,p=8$c29tZXNhbHQ$\
+                    qgW4yz2jO7oklapDpVwzUYgfDLzfwkppGTvhRDDBjkY";
+        let res = verify_encoded(hash, b"password").unwrap();
+        assert!(res);
+    }
+
+    #[test]
+    fn test_argon2d_for_miri() {
+        let hash = "$argon2d$v=19$m=256,t=2,p=16$c29tZXNhbHQ$\
+                    doW5kZ/0cTwqwbYTwr9JD0wNwy3tMyJMMk9ojGsC8bk";
+        let res = verify_encoded(hash, b"password").unwrap();
+        assert!(res);
+    }
+
+    #[test]
+    fn test_argon2i_for_miri() {
+        let hash = "$argon2i$v=19$m=256,t=2,p=16$c29tZXNhbHQ$\
+                    c1suSp12ZBNLSuyhD8pJriM2r5jP2kgZ5QdDAk3+HaY";
+        let res = verify_encoded(hash, b"password").unwrap();
+        assert!(res);
     }
 }
