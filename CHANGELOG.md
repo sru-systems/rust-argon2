@@ -4,6 +4,13 @@ ChangeLog for rust-argon2
 This documents all notable changes to
 [rust-argon2](https://github.com/sru-systems/rust-argon2).
 
+## 3.0.0
+
+- Bring back parallelism (by Jonas Malaco).
+- Update base64 dependency to 0.22.
+- Update constant_time_eq dependency to 0.4.2.
+
+
 ## 2.1.0
 
 - Add OWASP recommended configurations.
