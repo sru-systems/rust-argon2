@@ -158,11 +158,17 @@ pub fn num_len(number: u32) -> u32 {
 #[cfg(test)]
 mod tests {
 
+    #[cfg(feature = "crossbeam-utils")]
     use crate::config::Config;
+    #[cfg(feature = "crossbeam-utils")]
     use crate::context::Context;
     use crate::decoded::Decoded;
-    use crate::encoding::{base64_len, decode_string, encode_string, num_len};
+    #[cfg(feature = "crossbeam-utils")]
+    use crate::encoding::encode_string;
+    use crate::encoding::{base64_len, decode_string, num_len};
     use crate::error::Error;
+    #[cfg(feature = "crossbeam-utils")]
+    use crate::thread_mode::ThreadMode;
     use crate::variant::Variant;
     use crate::version::Version;
 
@@ -357,6 +363,7 @@ mod tests {
         assert_eq!(result, Err(Error::DecodingFail));
     }
 
+    #[cfg(feature = "crossbeam-utils")]
     #[test]
     fn encode_string_returns_correct_string() {
         let hash = b"12345678901234567890123456789012".to_vec();
@@ -366,6 +373,7 @@ mod tests {
             lanes: 1,
             mem_cost: 4096,
             secret: &[],
+            thread_mode: ThreadMode::Parallel,
             time_cost: 3,
             variant: Variant::Argon2i,
             version: Version::Version13,

@@ -12,6 +12,7 @@ use crate::core;
 use crate::encoding;
 use crate::memory::Memory;
 use crate::result::Result;
+use crate::thread_mode::ThreadMode;
 use crate::variant::Variant;
 use crate::version::Version;
 
@@ -73,16 +74,25 @@ pub fn encoded_len(
 /// ```
 ///
 ///
-/// Create an Argon2d encoded hash with 4 lanes:
+/// Create an Argon2d encoded hash with 4 lanes and parallel execution:
 ///
 /// ```
-/// use argon2::{self, Config, Variant};
+/// use argon2::{self, Config, ThreadMode, Variant};
 ///
 /// let pwd = b"password";
 /// let salt = b"somesalt";
 /// let mut config = Config::default();
 /// config.variant = Variant::Argon2d;
-/// config.lanes = 4;
+#[cfg_attr(feature = "crossbeam-utils", doc = "config.lanes = 4;")]
+#[cfg_attr(
+    feature = "crossbeam-utils",
+    doc = "config.thread_mode = ThreadMode::Parallel;"
+)]
+#[cfg_attr(not(feature = "crossbeam-utils"), doc = "config.lanes = 1;")]
+#[cfg_attr(
+    not(feature = "crossbeam-utils"),
+    doc = "config.thread_mode = ThreadMode::Sequential;"
+)]
 /// let encoded = argon2::hash_encoded(pwd, salt, &config).unwrap();
 /// ```
 pub fn hash_encoded(pwd: &[u8], salt: &[u8], config: &Config) -> Result<String> {
@@ -108,16 +118,25 @@ pub fn hash_encoded(pwd: &[u8], salt: &[u8], config: &Config) -> Result<String> 
 /// ```
 ///
 ///
-/// Create an Argon2d hash with 4 lanes:
+/// Create an Argon2d hash with 4 lanes and parallel execution:
 ///
 /// ```
-/// use argon2::{self, Config, Variant};
+/// use argon2::{self, Config, ThreadMode, Variant};
 ///
 /// let pwd = b"password";
 /// let salt = b"somesalt";
 /// let mut config = Config::default();
 /// config.variant = Variant::Argon2d;
-/// config.lanes = 4;
+#[cfg_attr(feature = "crossbeam-utils", doc = "config.lanes = 4;")]
+#[cfg_attr(
+    feature = "crossbeam-utils",
+    doc = "config.thread_mode = ThreadMode::Parallel;"
+)]
+#[cfg_attr(not(feature = "crossbeam-utils"), doc = "config.lanes = 1;")]
+#[cfg_attr(
+    not(feature = "crossbeam-utils"),
+    doc = "config.thread_mode = ThreadMode::Sequential;"
+)]
 /// let vec = argon2::hash_raw(pwd, salt, &config).unwrap();
 /// ```
 pub fn hash_raw(pwd: &[u8], salt: &[u8], config: &Config) -> Result<Vec<u8>> {
@@ -160,12 +179,18 @@ pub fn verify_encoded(encoded: &str, pwd: &[u8]) -> Result<bool> {
 /// ```
 pub fn verify_encoded_ext(encoded: &str, pwd: &[u8], secret: &[u8], ad: &[u8]) -> Result<bool> {
     let decoded = encoding::decode_string(encoded)?;
+    let threads = if cfg!(feature = "crossbeam-utils") {
+        decoded.parallelism
+    } else {
+        1
+    };
     let config = Config {
         variant: decoded.variant,
         version: decoded.version,
         mem_cost: decoded.mem_cost,
         time_cost: decoded.time_cost,
         lanes: decoded.parallelism,
+        thread_mode: ThreadMode::from_threads(threads),
         secret,
         ad,
         hash_length: decoded.hash.len() as u32,
@@ -176,7 +201,6 @@ pub fn verify_encoded_ext(encoded: &str, pwd: &[u8], secret: &[u8], ad: &[u8]) -
 /// Verifies the password with the supplied configuration.
 ///
 /// # Examples
-///
 ///
 /// ```
 /// use argon2::{self, Config};
@@ -203,7 +227,8 @@ pub fn verify_raw(pwd: &[u8], salt: &[u8], hash: &[u8], config: &Config) -> Resu
 fn run(context: &Context) -> Vec<u8> {
     let mut memory = Memory::new(context.config.lanes, context.lane_length);
     core::initialize(context, &mut memory);
-    core::fill_memory_blocks(context, &mut memory);
+    // SAFETY: `memory` is constructed from `context`.
+    unsafe { core::fill_memory_blocks(context, &mut memory) };
     core::finalize(context, &memory)
 }
 
@@ -213,7 +238,41 @@ mod tests {
 
     #[test]
     fn single_thread_verification_multi_lane_hash() {
-        let hash = "$argon2i$v=19$m=4096,t=3,p=4$YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo$BvBk2OaSofBHfbrUW61nHrWB/43xgfs/QJJ5DkMAd8I";
-        verify_encoded(hash, b"foo").unwrap();
+        let hash = "$argon2i$v=19$m=4096,t=3,p=4$YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo$\
+                    BvBk2OaSofBHfbrUW61nHrWB/43xgfs/QJJ5DkMAd8I";
+        let res = verify_encoded(hash, b"foo").unwrap();
+        assert!(res);
+    }
+
+    #[test]
+    fn test_argon2id_for_miri() {
+        let hash = "$argon2id$v=19$m=256,t=2,p=16$c29tZXNhbHQ$\
+                    0gasyPnKXiBHQ5bft/bd4jrmy2DdtrLTX3JR9co7fRY";
+        let res = verify_encoded(hash, b"password").unwrap();
+        assert!(res);
+    }
+
+    #[test]
+    fn test_argon2id_for_miri_2() {
+        let hash = "$argon2id$v=19$m=512,t=2,p=8$c29tZXNhbHQ$\
+                    qgW4yz2jO7oklapDpVwzUYgfDLzfwkppGTvhRDDBjkY";
+        let res = verify_encoded(hash, b"password").unwrap();
+        assert!(res);
+    }
+
+    #[test]
+    fn test_argon2d_for_miri() {
+        let hash = "$argon2d$v=19$m=256,t=2,p=16$c29tZXNhbHQ$\
+                    doW5kZ/0cTwqwbYTwr9JD0wNwy3tMyJMMk9ojGsC8bk";
+        let res = verify_encoded(hash, b"password").unwrap();
+        assert!(res);
+    }
+
+    #[test]
+    fn test_argon2i_for_miri() {
+        let hash = "$argon2i$v=19$m=256,t=2,p=16$c29tZXNhbHQ$\
+                    c1suSp12ZBNLSuyhD8pJriM2r5jP2kgZ5QdDAk3+HaY";
+        let res = verify_encoded(hash, b"password").unwrap();
+        assert!(res);
     }
 }

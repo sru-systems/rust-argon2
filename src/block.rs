@@ -11,7 +11,13 @@ use std::fmt;
 use std::fmt::Debug;
 use std::ops::{BitXorAssign, Index, IndexMut};
 
-/// Structure for the (1KB) memory block implemented as 128 64-bit words.
+/// Structure for the (1 KiB) memory block implemented as 128 64-bit words.
+// Blocks are 128-byte aligned to prevent false sharing. This specific alignment value replicates
+// what `crossbeam-utils::CachePadded` does on modern architectures, which either use 128-byte
+// cache lines (aarch64) or pull 64-byte cache lines in pairs (x86-64), without the need for
+// stubbing that type in when  `crossbeam-utils` isn't available. As blocks are fairly large (1
+// KiB), this simplification shouldn't severy affect the (rarer) targets with smaller cache lines.
+#[repr(align(128))]
 pub struct Block([u64; common::QWORDS_IN_BLOCK]);
 
 impl Block {
